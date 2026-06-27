@@ -10,7 +10,7 @@
     --border:       rgba(255, 255, 255, 0.06);
     --border-vivid: rgba(192, 132, 252, 0.25);
     --like-red:     #f87171;
-    --radius-card:  8px;
+    --radius-card:  12px;
     --radius-pill:  999px;
 }
 
@@ -229,7 +229,7 @@ body.dragging {
 }
 
 /* ============================================================
-   FEED EN GRID 3×N
+   FEED – UNA SOLA COLUMNA (SCROLL VERTICAL)
    ============================================================ */
 .feed-container {
     position: absolute;
@@ -238,13 +238,12 @@ body.dragging {
     right: 0;
     bottom: 0;
     overflow-y: auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    padding: 6px;
-    align-content: start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px 12px 24px 12px;
+    align-items: stretch;
     -webkit-overflow-scrolling: touch;
-    max-width: 100%;
 }
 .feed-container::-webkit-scrollbar { display: none; }
 .feed-container.dragging {
@@ -253,7 +252,7 @@ body.dragging {
 }
 
 /* ============================================================
-   TARJETA DE POST (más alargada: 3:4)
+   TARJETA DE POST – OCUPA TODO EL ANCHO
    ============================================================ */
 .post-card {
     background: var(--bg-surface);
@@ -261,18 +260,15 @@ body.dragging {
     overflow: hidden;
     border: 1px solid var(--border);
     width: 100%;
-    aspect-ratio: 3 / 4;               /* ← más alto que ancho (3:4) */
     display: flex;
     flex-direction: column;
     cursor: default;
     transition: border-color 0.2s, box-shadow 0.2s;
-    min-height: 0;
-    max-height: 100%;
-    position: relative;
+    flex-shrink: 0; /* No se encoge */
 }
 .post-card:hover {
     border-color: var(--border-vivid);
-    box-shadow: 0 2px 12px rgba(192, 132, 252, 0.08);
+    box-shadow: 0 4px 20px rgba(192, 132, 252, 0.08);
 }
 .post-card.faded {
     opacity: 0.2;
@@ -290,17 +286,17 @@ body.dragging {
     background: var(--bg-raised);
     color: var(--accent);
     text-align: center;
-    padding: 4px 2px;
+    padding: 8px 12px;
     font-weight: 700;
-    font-size: 8px;
-    letter-spacing: 1.5px;
+    font-size: 11px;
+    letter-spacing: 2px;
     text-transform: uppercase;
     flex-shrink: 0;
     border-bottom: 1px solid var(--border);
 }
 /* Descripción (visible en preview) */
 .post-description {
-    padding: 12px 16px;
+    padding: 16px 20px;
     color: var(--text-1);
     font-size: 16px;
     border-bottom: 1px solid var(--border-vivid);
@@ -312,16 +308,16 @@ body.dragging {
 .post-header-user {
     display: flex;
     align-items: center;
-    padding: 4px 6px;
-    gap: 4px;
+    padding: 8px 12px;
+    gap: 8px;
     flex-shrink: 0;
     background: var(--bg-raised);
     border-bottom: 1px solid var(--border);
-    height: 28px;
+    height: 44px;
 }
 .post-header-user .avatar {
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
     background: var(--bg-surface);
     border-radius: 50%;
     flex-shrink: 0;
@@ -329,27 +325,26 @@ body.dragging {
 }
 .post-header-user .user-lines { flex: 1; }
 .post-header-user .user-lines div {
-    height: 4px;
+    height: 6px;
     background: var(--bg-surface);
-    margin: 1px 0;
-    border-radius: 2px;
+    margin: 2px 0;
+    border-radius: 3px;
     border: 1px solid var(--border);
 }
-.post-header-user .user-lines div:nth-child(1) { width: 32px; }
-.post-header-user .user-lines div:nth-child(2) { width: 22px; }
+.post-header-user .user-lines div:nth-child(1) { width: 50px; }
+.post-header-user .user-lines div:nth-child(2) { width: 35px; }
 
 /* ============================================================
-   CARRUSEL (ocupa el espacio restante sin desbordar)
+   CARRUSEL – OCUPA UN TAMAÑO FIJO (16:9)
    ============================================================ */
 .post-image-carousel {
     width: 100%;
-    flex: 1;
+    aspect-ratio: 16 / 9;
     position: relative;
     overflow: hidden;
     cursor: pointer;
     touch-action: pan-y;
     background: var(--bg-raised);
-    min-height: 0;
 }
 .post-image-carousel.dragging { cursor: grabbing; }
 .carousel-container {
@@ -376,7 +371,7 @@ body.dragging {
     justify-content: center;
     align-items: center;
     background-color: var(--bg-raised);
-    font-size: 28px;
+    font-size: 40px;
     color: var(--text-2);
 }
 .carousel-slide img {
@@ -399,59 +394,59 @@ body.dragging {
 /* Indicadores del carrusel (solo visible en preview) */
 .carousel-indicators {
     position: absolute;
-    bottom: 4px;
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 3px;
+    gap: 6px;
     z-index: 2;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 2px 6px;
-    border-radius: 10px;
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 4px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(6px);
 }
 .carousel-indicators .dot {
-    width: 4px;
-    height: 4px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.3);
     cursor: pointer;
     transition: all 0.3s;
 }
 .carousel-indicators .dot.active {
     background: var(--accent);
-    width: 12px;
-    border-radius: 2px;
-    box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
+    width: 20px;
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(192, 132, 252, 0.7);
 }
 
 /* ============================================================
    ACCIONES DEL POST
    ============================================================ */
 .post-actions {
-    padding: 4px 6px;
+    padding: 8px 12px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 3px;
+    gap: 12px;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
     background: var(--bg-surface);
-    height: 28px;
+    height: 44px;
 }
 .post-actions .stars { display: none; }
 .post-actions .action-btn {
     background: none;
     border: none;
-    font-size: 11px;
+    font-size: 16px;
     cursor: pointer;
-    padding: 2px 4px;
-    border-radius: 4px;
+    padding: 4px 8px;
+    border-radius: 8px;
     transition: background 0.15s, transform 0.15s, color 0.15s;
     color: var(--text-2);
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     font-weight: 500;
 }
 .post-actions .action-btn:hover {
@@ -465,12 +460,12 @@ body.dragging {
     color: var(--like-red);
 }
 .post-actions .action-btn .count {
-    font-size: 9px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-2);
 }
 .post-actions .action-btn .icon {
-    font-size: 11px;
+    font-size: 16px;
 }
 
 /* ============================================================
@@ -687,7 +682,6 @@ body.dragging {
 }
 .preview-content .post-card.preview-card .post-image-carousel {
     aspect-ratio: 16/9;
-    flex: none;
 }
 .preview-content .post-card.preview-card {
     border-radius: 14px;
@@ -700,6 +694,7 @@ body.dragging {
 #load-more-btn {
     font-family: inherit;
     transition: all 0.2s;
+    width: 100%;
 }
 #load-more-btn:hover {
     transform: scale(1.02);
@@ -710,12 +705,14 @@ body.dragging {
 .no-more-message {
     font-family: inherit;
     letter-spacing: 1px;
+    text-align: center;
+    padding: 20px;
+    color: var(--text-2);
 }
 
 .loading-message,
 .empty-message,
 .error-message {
-    grid-column: 1 / -1;
     text-align: center;
     padding: 40px 20px;
     color: var(--text-2);
@@ -742,7 +739,7 @@ body.dragging {
 }
 
 /* ============================================================
-   PANTALLAS PEQUEÑAS (<400px) – mantenemos 3 columnas
+   PANTALLAS PEQUEÑAS (<400px) – ajustes de tamaño
    ============================================================ */
 @media (max-width: 400px) {
     .top-nav {
@@ -768,30 +765,32 @@ body.dragging {
         font-size: 16px;
     }
     .feed-container {
-        padding: 4px 3px;
-        gap: 4px;
-        grid-template-columns: repeat(3, 1fr);
+        padding: 8px 8px 16px 8px;
+        gap: 12px;
     }
     .post-header-user {
-        height: 22px;
-        padding: 2px 4px;
+        height: 36px;
+        padding: 4px 8px;
     }
-    .post-header-user .avatar { width: 14px; height: 14px; }
+    .post-header-user .avatar { width: 22px; height: 22px; }
     .post-header-user .user-lines div {
-        height: 3px; margin: 1px 0;
+        height: 4px; margin: 2px 0;
     }
-    .post-header-user .user-lines div:nth-child(1) { width: 20px; }
-    .post-header-user .user-lines div:nth-child(2) { width: 14px; }
+    .post-header-user .user-lines div:nth-child(1) { width: 35px; }
+    .post-header-user .user-lines div:nth-child(2) { width: 25px; }
     .post-actions {
-        height: 22px;
-        padding: 2px 4px;
+        height: 36px;
+        padding: 4px 8px;
+        gap: 8px;
     }
-    .post-actions .action-btn { font-size: 9px; padding: 1px 3px; }
-    .post-actions .action-btn .icon  { font-size: 9px; }
-    .post-actions .action-btn .count { font-size: 8px; }
+    .post-actions .action-btn { font-size: 13px; }
+    .post-actions .action-btn .icon  { font-size: 13px; }
+    .post-actions .action-btn .count { font-size: 11px; }
     .carousel-indicators {
-        bottom: 3px; padding: 2px 4px; gap: 2px;
+        bottom: 4px;
+        padding: 2px 8px;
+        gap: 4px;
     }
-    .carousel-indicators .dot { width: 3px; height: 3px; }
-    .carousel-indicators .dot.active { width: 8px; }
+    .carousel-indicators .dot { width: 4px; height: 4px; }
+    .carousel-indicators .dot.active { width: 14px; }
 }
