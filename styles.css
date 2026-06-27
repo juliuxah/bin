@@ -228,7 +228,9 @@ body.dragging {
     border-color: var(--border-vivid);
 }
 
-/* FEED EN GRID 3×N */
+/* ============================================================
+   FEED EN GRID 3×N (CORREGIDO PARA EVITAR SUPERPOSICIÓN)
+   ============================================================ */
 .feed-container {
     position: absolute;
     top: 142px;
@@ -242,6 +244,7 @@ body.dragging {
     padding: 6px;
     align-content: start;
     -webkit-overflow-scrolling: touch;
+    max-width: 100%;
 }
 .feed-container::-webkit-scrollbar { display: none; }
 .feed-container.dragging {
@@ -249,7 +252,9 @@ body.dragging {
     touch-action: none !important;
 }
 
-/* TARJETA DE POST (ligeramente alargada: 4:5) */
+/* ============================================================
+   TARJETA DE POST (con dimensiones fijas y sin superposición)
+   ============================================================ */
 .post-card {
     background: var(--bg-surface);
     border-radius: var(--radius-card);
@@ -259,8 +264,11 @@ body.dragging {
     aspect-ratio: 4 / 5;
     display: flex;
     flex-direction: column;
-    cursor: default; /* ya no es clickeable toda la tarjeta */
+    cursor: default;
     transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 0;
+    max-height: 100%;
+    position: relative;
 }
 .post-card:hover {
     border-color: var(--border-vivid);
@@ -270,7 +278,7 @@ body.dragging {
     opacity: 0.2;
 }
 
-/* Ocultar descripción y título en el feed */
+/* Ocultar descripción y título en el feed (solo se ven en preview) */
 .feed-container .post-card .post-header-black,
 .feed-container .post-card .post-description,
 .feed-container .post-card .post-title {
@@ -300,7 +308,7 @@ body.dragging {
     display: block;
 }
 
-/* Cabecera de usuario */
+/* Cabecera de usuario (solo para diseño, no se usa realmente) */
 .post-header-user {
     display: flex;
     align-items: center;
@@ -330,15 +338,18 @@ body.dragging {
 .post-header-user .user-lines div:nth-child(1) { width: 32px; }
 .post-header-user .user-lines div:nth-child(2) { width: 22px; }
 
-/* CARRUSEL (ocupa el espacio restante) */
+/* ============================================================
+   CARRUSEL (ocupa el espacio restante sin desbordar)
+   ============================================================ */
 .post-image-carousel {
     width: 100%;
     flex: 1;
     position: relative;
     overflow: hidden;
-    cursor: pointer;  /* indica que es clickeable */
+    cursor: pointer;
     touch-action: pan-y;
     background: var(--bg-raised);
+    min-height: 0;
 }
 .post-image-carousel.dragging { cursor: grabbing; }
 .carousel-container {
@@ -414,7 +425,9 @@ body.dragging {
     box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
 }
 
-/* ACCIONES DEL POST */
+/* ============================================================
+   ACCIONES DEL POST
+   ============================================================ */
 .post-actions {
     padding: 4px 6px;
     display: flex;
@@ -460,7 +473,9 @@ body.dragging {
     font-size: 11px;
 }
 
-/* DRAG PREVIEW */
+/* ============================================================
+   DRAG PREVIEW
+   ============================================================ */
 #drag-element {
     position: fixed;
     width: 110px;
@@ -679,7 +694,56 @@ body.dragging {
     box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
 
-/* PANTALLAS PEQUEÑAS (<400px) – mantenemos 3 columnas y ajustamos tamaños */
+/* ============================================================
+   BOTÓN "CARGAR MÁS" Y MENSAJES DEL FEED
+   ============================================================ */
+#load-more-btn {
+    font-family: inherit;
+    transition: all 0.2s;
+}
+#load-more-btn:hover {
+    transform: scale(1.02);
+}
+#load-more-btn:active {
+    transform: scale(0.98);
+}
+.no-more-message {
+    font-family: inherit;
+    letter-spacing: 1px;
+}
+
+.loading-message,
+.empty-message,
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-2);
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+.loading-message::before {
+    content: '';
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+.error-message {
+    color: var(--like-red);
+}
+
+/* ============================================================
+   PANTALLAS PEQUEÑAS (<400px) – mantenemos 3 columnas
+   ============================================================ */
 @media (max-width: 400px) {
     .top-nav {
         padding: 0 10px;
