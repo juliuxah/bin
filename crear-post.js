@@ -10,12 +10,12 @@ console.log('✅ Módulos Firebase importados correctamente.');
 // 2. CONFIGURACIÓN DE FIREBASE
 // ============================================================
 const firebaseConfig = {
-    apiKey: "AIzaSyCZwssYsjLjBXiIE5_1BNPYICU3MLgJR08",
-    authDomain: "bin1-462ea.firebaseapp.com",
-    projectId: "bin1-462ea",
-    storageBucket: "bin1-462ea.firebasestorage.app",
-    messagingSenderId: "446700825873",
-    appId: "1:446700825873:web:2550025dfc6610b8a2b8b3"
+  apiKey: "AIzaSyCZwssYsjLjBXiiE5_lBNPYICU3MLgJR08",
+  authDomain: "bin1-462ea.firebaseapp.com",
+  projectId: "bin1-462ea",
+  storageBucket: "bin1-462ea.firebasestorage.app",
+  messagingSenderId: "446700825873",
+  appId: "1:446700825873:web:2550025dfc6610b8a2b0b0"
 };
 
 const app = initializeApp(firebaseConfig);
