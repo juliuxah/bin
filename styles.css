@@ -229,7 +229,7 @@ body.dragging {
 }
 
 /* ============================================================
-   FEED EN GRID 3×N
+   FEED EN GRID 3×N (SCROLL INFINITO)
    ============================================================ */
 .feed-container {
     position: absolute;
@@ -245,6 +245,8 @@ body.dragging {
     align-content: start;
     -webkit-overflow-scrolling: touch;
     max-width: 100%;
+    /* Para que el scroll sea suave en móviles */
+    scroll-behavior: smooth;
 }
 .feed-container::-webkit-scrollbar { display: none; }
 .feed-container.dragging {
@@ -261,7 +263,7 @@ body.dragging {
     overflow: hidden;
     border: 1px solid var(--border);
     width: 100%;
-    aspect-ratio: 3 / 4;               /* ← más alto que ancho (3:4) */
+    aspect-ratio: 3 / 4;               /* 3:4 = más alto que ancho */
     display: flex;
     flex-direction: column;
     cursor: default;
@@ -695,23 +697,8 @@ body.dragging {
 }
 
 /* ============================================================
-   BOTÓN "CARGAR MÁS" Y MENSAJES DEL FEED
+   SCROLL INFINITO: MENSAJES Y LOADER
    ============================================================ */
-#load-more-btn {
-    font-family: inherit;
-    transition: all 0.2s;
-}
-#load-more-btn:hover {
-    transform: scale(1.02);
-}
-#load-more-btn:active {
-    transform: scale(0.98);
-}
-.no-more-message {
-    font-family: inherit;
-    letter-spacing: 1px;
-}
-
 .loading-message,
 .empty-message,
 .error-message {
@@ -739,6 +726,36 @@ body.dragging {
 }
 .error-message {
     color: var(--like-red);
+}
+
+/* Mensaje de "No hay más posts" o "Cargando más..." */
+#load-more-sentinel {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    color: var(--text-2);
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+#load-more-sentinel.loading::after {
+    content: '';
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+.no-more-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--text-2);
+    padding: 20px;
+    font-size: 14px;
+    letter-spacing: 1px;
 }
 
 /* ============================================================

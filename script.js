@@ -1,6 +1,6 @@
 // Importar los módulos necesarios desde la CDN de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Configuración de Firebase
@@ -305,7 +305,7 @@ function createPostElement(postData, docId) {
             <div class="carousel-container">
                 <div class="carousel-track">
                     <div class="carousel-slide" style="${isImage ? '' : 'background: linear-gradient(135deg, #7ed957, #5cb85c);'}">
-                        ${isImage ? `<img src="${image}" alt="${title}">` : '📦'}
+                        ${isImage ? `<img src="${image}" alt="${title}" loading="lazy">` : '📦'}
                     </div>
                 </div>
                 <div class="carousel-indicators">
@@ -331,41 +331,164 @@ function createPostElement(postData, docId) {
 }
 
 // ------------------------------------------------------------
-// CARGAR POSTS DESDE FIRESTORE (sin inicializar carrusel)
+// SCROLL INFINITO: VARIABLES DE ESTADO
 // ------------------------------------------------------------
-async function cargarPostsDesdeLaNube() {
-    console.log("🔄 Buscando posts en la nube...");
-    const feed = document.getElementById('feed');
-    if (!feed) return;
+let lastVisible = null;
+let isLoading = false;
+let hasMore = true;
+const PAGE_SIZE = 9; // 3 columnas × 3 filas = 9 posts
 
-    feed.innerHTML = `<div class="loading-message">Cargando publicaciones…</div>`;
+// ------------------------------------------------------------
+// CARGAR POSTS (con paginación)
+// ------------------------------------------------------------
+async function cargarPostsDesdeLaNube(loadMore = false) {
+    if (isLoading) return;
+    if (!hasMore && loadMore) return;
+
+    isLoading = true;
+    const feed = document.getElementById('feed');
+
+    // Si es la primera carga, mostrar loading y limpiar feed
+    if (!loadMore) {
+        feed.innerHTML = `<div class="loading-message">Cargando publicaciones…</div>`;
+        lastVisible = null;
+        hasMore = true;
+    }
 
     try {
-        const q = query(collection(db, "posts"), orderBy("fecha", "desc"));
-        const querySnapshot = await getDocs(q);
-
-        feed.innerHTML = '';
-
-        if (querySnapshot.empty) {
-            feed.innerHTML = `<div class="empty-message">No hay publicaciones aún. ¡Crea la primera!</div>`;
-        } else {
-            querySnapshot.forEach((doc) => {
-                const postData = doc.data();
-                const newPost = createPostElement(postData, doc.id);
-                feed.appendChild(newPost);
-            });
-            initActions();
+        // Construir consulta
+        let q = query(collection(db, "posts"), orderBy("fecha", "desc"), limit(PAGE_SIZE));
+        if (loadMore && lastVisible) {
+            q = query(collection(db, "posts"), orderBy("fecha", "desc"), startAfter(lastVisible), limit(PAGE_SIZE));
         }
 
-        // Actualizar UI de autenticación (para mostrar mensaje de bienvenida o invitación)
+        const querySnapshot = await getDocs(q);
+        const docs = querySnapshot.docs;
+
+        if (docs.length === 0) {
+            hasMore = false;
+            if (!loadMore) {
+                feed.innerHTML = `<div class="empty-message">No hay publicaciones aún. ¡Crea la primera!</div>`;
+            } else {
+                // Mostrar "No hay más publicaciones" en el centinela
+                const sentinel = document.getElementById('sentinel');
+                if (sentinel) {
+                    sentinel.innerHTML = '<div class="no-more-message">— No hay más publicaciones —</div>';
+                }
+            }
+            isLoading = false;
+            return;
+        }
+
+        // Guardar el último documento para la próxima página
+        lastVisible = docs[docs.length - 1];
+
+        // Si es primera carga, limpiar feed (ya lo hicimos con el loading)
+        if (!loadMore) {
+            feed.innerHTML = '';
+        } else {
+            // Quitar el centinela anterior (si existe) para evitar duplicados
+            const oldSentinel = document.getElementById('sentinel');
+            if (oldSentinel) oldSentinel.remove();
+        }
+
+        // Crear y añadir posts
+        docs.forEach((doc) => {
+            const postData = doc.data();
+            const newPost = createPostElement(postData, doc.id);
+            feed.appendChild(newPost);
+        });
+
+        // Inicializar acciones en los nuevos posts (NO carrusel)
+        initActions();
+
+        // Aplicar lazy loading a las imágenes nuevas
+        feed.querySelectorAll('.carousel-slide img').forEach(img => {
+            if (!img.hasAttribute('loading')) {
+                img.setAttribute('loading', 'lazy');
+            }
+        });
+
+        // Crear centinela para el scroll infinito (si hay más posts)
+        if (docs.length === PAGE_SIZE) {
+            const sentinel = document.createElement('div');
+            sentinel.id = 'sentinel';
+            sentinel.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 20px;
+                color: var(--text-2);
+                font-size: 14px;
+            `;
+            sentinel.innerHTML = '<div class="loading-spinner">Cargando más publicaciones…</div>';
+            feed.appendChild(sentinel);
+            
+            // Si el centinela ya está visible, cargar más inmediatamente
+            observeSentinel();
+        } else {
+            hasMore = false;
+            // Mostrar mensaje de fin en un centinela
+            const sentinel = document.createElement('div');
+            sentinel.id = 'sentinel';
+            sentinel.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 20px;
+                color: var(--text-2);
+                font-size: 14px;
+            `;
+            sentinel.innerHTML = '<div class="no-more-message">— No hay más publicaciones —</div>';
+            feed.appendChild(sentinel);
+        }
+
+        // Actualizar UI de autenticación (para mostrar mensaje de bienvenida/invitación)
         updateAuthUI(auth.currentUser);
 
-        console.log("✅ Posts cargados desde Firestore (sin carrusel en feed)");
+        console.log(`✅ Cargados ${docs.length} posts (total: ${feed.querySelectorAll('.post-card').length})`);
+        isLoading = false;
+
     } catch (error) {
         console.error("❌ Error al cargar posts:", error);
-        feed.innerHTML = `<div class="error-message">Error al cargar las publicaciones. Intenta de nuevo.</div>`;
+        if (!loadMore) {
+            feed.innerHTML = `<div class="error-message">Error al cargar las publicaciones. Intenta de nuevo.</div>`;
+        }
         showGlobalNotification('Error al cargar los posts. Intenta de nuevo.', '#e74c3c');
+        isLoading = false;
     }
+}
+
+// ------------------------------------------------------------
+// OBSERVADOR DEL CENTINELA PARA SCROLL INFINITO
+// ------------------------------------------------------------
+let observer = null;
+
+function observeSentinel() {
+    // Desconectar observador anterior si existe
+    if (observer) {
+        observer.disconnect();
+        observer = null;
+    }
+
+    const sentinel = document.getElementById('sentinel');
+    if (!sentinel) return;
+
+    // Si el centinela es el mensaje de "no hay más", no observar
+    if (sentinel.querySelector('.no-more-message')) return;
+
+    observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && hasMore && !isLoading) {
+                console.log('📜 Centinela visible, cargando más posts...');
+                cargarPostsDesdeLaNube(true);
+            }
+        });
+    }, {
+        root: document.getElementById('feed'),
+        rootMargin: '0px 0px 100px 0px', // Activa un poco antes de llegar al final
+        threshold: 0.1
+    });
+
+    observer.observe(sentinel);
 }
 
 // ------------------------------------------------------------
@@ -531,11 +654,11 @@ function updateAuthUI(user) {
         userAvatarImg.src = '';
         if (createPostBtn) createPostBtn.style.display = 'none';
 
-        // FORZAR ACTUALIZACIÓN DEL MENSAJE A INVITACIÓN
+        // Mostrar mensaje de invitación en el feed
         if (feed) {
             let authMsg = document.getElementById('auth-message');
             if (authMsg) {
-                // Si existe, actualizar contenido a invitación
+                // Si existe, actualizar a invitación
                 authMsg.innerHTML = `
                     <div style="font-size: 32px;">🔐</div>
                     <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
@@ -583,47 +706,41 @@ function updateAuthUI(user) {
 }
 
 // ------------------------------------------------------------
-// INICIALIZACIÓN AL CARGAR EL DOM
+// INICIALIZACIÓN
 // ------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
-    // Inyectar estilos para mensajes de carga/vacío/error
-    if (!document.getElementById('custom-feed-styles')) {
+    // Inyectar estilos adicionales (loading spinner para scroll infinito)
+    if (!document.getElementById('infinite-scroll-styles')) {
         const style = document.createElement('style');
-        style.id = 'custom-feed-styles';
+        style.id = 'infinite-scroll-styles';
         style.textContent = `
-            .loading-message,
-            .empty-message,
-            .error-message {
-                grid-column: 1 / -1;
-                text-align: center;
-                padding: 40px 20px;
-                color: var(--text-2);
-                font-size: 16px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 12px;
-            }
-            .loading-message::before {
-                content: '';
-                width: 32px;
-                height: 32px;
+            .loading-spinner {
+                display: inline-block;
+                width: 24px;
+                height: 24px;
                 border: 3px solid var(--border);
                 border-top-color: var(--accent);
                 border-radius: 50%;
                 animation: spin 0.8s linear infinite;
+                margin-right: 8px;
+                vertical-align: middle;
             }
-            @keyframes spin {
-                to { transform: rotate(360deg); }
+            #sentinel {
+                padding: 16px;
+                text-align: center;
+                color: var(--text-2);
+                font-size: 14px;
             }
-            .error-message {
-                color: var(--like-red);
+            .no-more-message {
+                color: var(--text-2);
+                font-size: 13px;
+                letter-spacing: 1px;
             }
         `;
         document.head.appendChild(style);
     }
 
-    // Inicializar acciones (los carruseles no se inicializan en feed)
+    // Inicializar acciones
     initActions();
 
     // Escuchar autenticación
@@ -631,8 +748,8 @@ document.addEventListener('DOMContentLoaded', function() {
         updateAuthUI(user);
     });
 
-    // Cargar posts
-    cargarPostsDesdeLaNube();
+    // Cargar primera página (9 posts)
+    cargarPostsDesdeLaNube(false);
 
     // Inicializar vista previa
     initPostSelection();
