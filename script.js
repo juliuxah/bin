@@ -455,7 +455,7 @@ function initPostSelection() {
 }
 
 // ------------------------------------------------------------
-// MANEJO DE AUTENTICACIÓN Y VISIBILIDAD DE BOTONES (CON MENSAJE EN FEED)
+// MANEJO DE AUTENTICACIÓN Y VISIBILIDAD DE BOTONES
 // ------------------------------------------------------------
 function updateAuthUI(user) {
     const registerBtn = document.getElementById('register-btn-nav');
@@ -523,42 +523,61 @@ function updateAuthUI(user) {
             }
         }
     } else {
-        // No autenticado
+        // No autenticado: ocultar botones y mostrar invitación
         registerBtn.style.display = 'flex';
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
         userAvatar.style.display = 'none';
         userAvatarImg.src = '';
         if (createPostBtn) createPostBtn.style.display = 'none';
-        // Insertar mensaje de invitación si no existe
-        if (feed && !document.getElementById('auth-message')) {
-            const msg = document.createElement('div');
-            msg.id = 'auth-message';
-            msg.style.cssText = `
-                grid-column: 1 / -1;
-                text-align: center;
-                padding: 24px 20px;
-                color: var(--text-2);
-                background: var(--bg-surface);
-                border-radius: 12px;
-                border: 1px solid var(--border-vivid);
-                margin-bottom: 8px;
-                font-size: 15px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
-            `;
-            msg.innerHTML = `
-                <div style="font-size: 32px;">🔐</div>
-                <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
-                <div style="font-size: 13px; color: var(--text-2);">
-                    <a href="login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
-                    &nbsp;o&nbsp;
-                    <a href="registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
-                </div>
-            `;
-            feed.prepend(msg);
+
+        // FORZAR ACTUALIZACIÓN DEL MENSAJE A INVITACIÓN
+        if (feed) {
+            let authMsg = document.getElementById('auth-message');
+            if (authMsg) {
+                // Si existe, actualizar contenido a invitación
+                authMsg.innerHTML = `
+                    <div style="font-size: 32px;">🔐</div>
+                    <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
+                    <div style="font-size: 13px; color: var(--text-2);">
+                        <a href="login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
+                        &nbsp;o&nbsp;
+                        <a href="registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
+                    </div>
+                `;
+                authMsg.style.background = 'var(--bg-surface)';
+                authMsg.style.border = '1px solid var(--border-vivid)';
+                authMsg.style.color = 'var(--text-2)';
+            } else {
+                // Crear nuevo mensaje de invitación
+                const msg = document.createElement('div');
+                msg.id = 'auth-message';
+                msg.style.cssText = `
+                    grid-column: 1 / -1;
+                    text-align: center;
+                    padding: 24px 20px;
+                    color: var(--text-2);
+                    background: var(--bg-surface);
+                    border-radius: 12px;
+                    border: 1px solid var(--border-vivid);
+                    margin-bottom: 8px;
+                    font-size: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                msg.innerHTML = `
+                    <div style="font-size: 32px;">🔐</div>
+                    <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
+                    <div style="font-size: 13px; color: var(--text-2);">
+                        <a href="login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
+                        &nbsp;o&nbsp;
+                        <a href="registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
+                    </div>
+                `;
+                feed.prepend(msg);
+            }
         }
     }
 }
