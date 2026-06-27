@@ -357,7 +357,7 @@ async function cargarPostsDesdeLaNube() {
             initActions();
         }
 
-        // Actualizar UI de autenticación para mostrar mensaje si no hay usuario
+        // Actualizar UI de autenticación (para mostrar mensaje de bienvenida o invitación)
         updateAuthUI(auth.currentUser);
 
         console.log("✅ Posts cargados desde Firestore (sin carrusel en feed)");
@@ -480,9 +480,48 @@ function updateAuthUI(user) {
         }
         userAvatar.title = user.displayName || 'Usuario';
         if (createPostBtn) createPostBtn.style.display = 'flex';
-        // Eliminar mensaje de autenticación si existe
-        const authMsg = document.getElementById('auth-message');
-        if (authMsg) authMsg.remove();
+
+        // Mostrar mensaje de bienvenida en el feed (reemplazar o crear)
+        if (feed) {
+            let authMsg = document.getElementById('auth-message');
+            const displayName = user.displayName || 'Usuario';
+            if (authMsg) {
+                // Actualizar contenido existente
+                authMsg.innerHTML = `
+                    <div style="font-size: 28px;">👋</div>
+                    <div><strong>Bienvenido a BIN, ${displayName}!</strong></div>
+                    <div style="font-size: 13px; color: var(--text-2);">Disfruta explorando y compartiendo</div>
+                `;
+                authMsg.style.background = 'var(--bg-raised)';
+                authMsg.style.border = '1px solid var(--border-vivid)';
+                authMsg.style.color = 'var(--text-1)';
+            } else {
+                // Crear nuevo mensaje de bienvenida
+                const msg = document.createElement('div');
+                msg.id = 'auth-message';
+                msg.style.cssText = `
+                    grid-column: 1 / -1;
+                    text-align: center;
+                    padding: 16px 20px;
+                    color: var(--text-1);
+                    background: var(--bg-raised);
+                    border-radius: 12px;
+                    border: 1px solid var(--border-vivid);
+                    margin-bottom: 8px;
+                    font-size: 15px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 6px;
+                `;
+                msg.innerHTML = `
+                    <div style="font-size: 28px;">👋</div>
+                    <div><strong>Bienvenido a BIN, ${displayName}!</strong></div>
+                    <div style="font-size: 13px; color: var(--text-2);">Disfruta explorando y compartiendo</div>
+                `;
+                feed.prepend(msg);
+            }
+        }
     } else {
         // No autenticado
         registerBtn.style.display = 'flex';
@@ -491,7 +530,7 @@ function updateAuthUI(user) {
         userAvatar.style.display = 'none';
         userAvatarImg.src = '';
         if (createPostBtn) createPostBtn.style.display = 'none';
-        // Insertar mensaje de autenticación si no existe y el feed está presente
+        // Insertar mensaje de invitación si no existe
         if (feed && !document.getElementById('auth-message')) {
             const msg = document.createElement('div');
             msg.id = 'auth-message';
