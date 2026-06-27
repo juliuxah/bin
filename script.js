@@ -492,47 +492,247 @@ function observeSentinel() {
 }
 
 // ------------------------------------------------------------
-// VISTA PREVIA DE POSTS (se abre al hacer clic en la imagen)
+// VISTA PREVIA DE POSTS — FULLSCREEN CON SWIPE ENTRE POSTS
 // ------------------------------------------------------------
 function initPostSelection() {
     const feed = document.getElementById('feed');
     const overlay = document.getElementById('post-preview-overlay');
-    const container = document.getElementById('preview-container');
     const closeBtn = document.getElementById('close-preview');
 
-    function openPreview(postCard) {
-        const clone = postCard.cloneNode(true);
-        clone.classList.add('preview-card');
-        container.innerHTML = '';
-        container.appendChild(clone);
-        
-        const desc = clone.querySelector('.post-description');
-        if (desc) {
-            desc.style.display = 'block';
-            desc.style.padding = '12px 16px';
-            desc.style.color = 'var(--text-1)';
-            desc.style.fontSize = '16px';
-            desc.style.borderBottom = '1px solid var(--border-vivid)';
-            desc.style.background = 'var(--bg-raised)';
+    // Índice del post abierto y lista de todos los post-cards del feed
+    let currentIndex = 0;
+    let allCards = [];
+    let previewTrack = null;
+
+    // Estado del swipe entre posts
+    let swipeStartX = 0;
+    let swipeStartY = 0;
+    let swipeActive = false;
+    let swipeDir = null; // 'h' | 'v' | null
+    let dragDelta = 0;
+    const SWIPE_THRESHOLD = 50;
+
+    // ---------- Construir un slide de preview para un post-card ----------
+    function buildSlide(postCard) {
+        const slide = document.createElement('div');
+        slide.className = 'preview-slide';
+
+        const title = postCard.querySelector('.post-header-black');
+        const desc = postCard.querySelector('.post-description');
+        const carouselSrc = postCard.querySelector('.post-image-carousel');
+
+        // Zona de imagen (ocupa todo el espacio flexible)
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'preview-img-wrap';
+
+        if (carouselSrc) {
+            const carouselClone = carouselSrc.cloneNode(true);
+            carouselClone.dataset.initialized = '';
+            imgWrap.appendChild(carouselClone);
+            // init carrusel de imágenes dentro del slide en el siguiente tick
+            requestAnimationFrame(() => initCarousel(carouselClone));
+        } else {
+            const emoji = document.createElement('div');
+            emoji.className = 'preview-emoji';
+            emoji.textContent = '🖼️';
+            imgWrap.appendChild(emoji);
         }
-        
-        const carousel = clone.querySelector('.post-image-carousel');
-        if (carousel) {
-            carousel.dataset.initialized = '';
-            initCarousel(carousel);
+        slide.appendChild(imgWrap);
+
+        // Panel inferior
+        const bottom = document.createElement('div');
+        bottom.className = 'preview-bottom';
+
+        if (title && title.textContent.trim()) {
+            const t = document.createElement('div');
+            t.className = 'preview-title';
+            t.textContent = title.textContent.trim();
+            bottom.appendChild(t);
         }
-        initActions(clone);
-        
-        overlay.style.display = 'flex';
+        if (desc && desc.textContent.trim()) {
+            const d = document.createElement('div');
+            d.className = 'preview-description';
+            d.textContent = desc.textContent.trim();
+            bottom.appendChild(d);
+        }
+
+        // Acciones (like, comment, share) copiadas del original
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'preview-actions-row';
+        const origActions = postCard.querySelectorAll('.action-btn');
+        origActions.forEach(btn => {
+            const clone = btn.cloneNode(true);
+            actionsRow.appendChild(clone);
+        });
+        bottom.appendChild(actionsRow);
+        slide.appendChild(bottom);
+
+        // Inicializar acciones en este slide
+        initActions(slide);
+
+        return slide;
     }
 
+    // ---------- Abrir overlay en un índice dado ----------
+    function openPreview(index) {
+        // Recoger todos los post-cards visibles en el feed en el momento de abrir
+        allCards = Array.from(feed.querySelectorAll('.post-card'));
+        if (allCards.length === 0) return;
+        currentIndex = Math.max(0, Math.min(index, allCards.length - 1));
+
+        // Construir track con un slide por cada post
+        const container = document.getElementById('preview-container');
+        container.innerHTML = '';
+
+        const trackWrapper = document.createElement('div');
+        trackWrapper.className = 'preview-track-wrapper';
+
+        previewTrack = document.createElement('div');
+        previewTrack.className = 'preview-track';
+
+        allCards.forEach(card => {
+            previewTrack.appendChild(buildSlide(card));
+        });
+        trackWrapper.appendChild(previewTrack);
+        container.appendChild(trackWrapper);
+
+        // Actualizar contador
+        updateCounter();
+        // Posicionar sin animación
+        setTrackPosition(currentIndex, false);
+
+        // Mostrar overlay
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+
+        // Registrar swipe-handlers en el overlay
+        attachSwipeHandlers(trackWrapper);
+    }
+
+    // ---------- Mover el track ----------
+    function setTrackPosition(index, animate = true) {
+        if (!previewTrack) return;
+        previewTrack.style.transition = animate
+            ? 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)'
+            : 'none';
+        previewTrack.style.transform = `translateX(${-index * 100}%)`;
+    }
+
+    function goTo(index) {
+        currentIndex = Math.max(0, Math.min(index, allCards.length - 1));
+        setTrackPosition(currentIndex, true);
+        updateCounter();
+    }
+
+    function updateCounter() {
+        let counter = overlay.querySelector('.preview-post-counter');
+        if (!counter) {
+            counter = document.createElement('div');
+            counter.className = 'preview-post-counter';
+            overlay.appendChild(counter);
+        }
+        if (allCards.length > 1) {
+            counter.style.display = '';
+            counter.textContent = `${currentIndex + 1} / ${allCards.length}`;
+        } else {
+            counter.style.display = 'none';
+        }
+    }
+
+    // ---------- Swipe entre posts (horizontal) ----------
+    function attachSwipeHandlers(el) {
+        // Limpiar listeners anteriores clonando el elemento no es ideal aquí;
+        // usamos una bandera en el elemento.
+        if (el._swipeAttached) return;
+        el._swipeAttached = true;
+
+        el.addEventListener('pointerdown', onSwipeStart, { passive: true });
+        el.addEventListener('pointermove', onSwipeMove, { passive: false });
+        el.addEventListener('pointerup', onSwipeEnd);
+        el.addEventListener('pointercancel', onSwipeEnd);
+    }
+
+    function onSwipeStart(e) {
+        // Ignorar si el toque viene de un botón de acción
+        if (e.target.closest('.action-btn')) return;
+        swipeActive = true;
+        swipeDir = null;
+        dragDelta = 0;
+        swipeStartX = e.clientX;
+        swipeStartY = e.clientY;
+        if (previewTrack) previewTrack.style.transition = 'none';
+    }
+
+    function onSwipeMove(e) {
+        if (!swipeActive) return;
+        const dx = e.clientX - swipeStartX;
+        const dy = e.clientY - swipeStartY;
+
+        // Determinar dirección dominante una sola vez
+        if (!swipeDir && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+            swipeDir = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
+        }
+        if (swipeDir !== 'h') return;
+
+        // Evitar scroll vertical mientras se navega horizontalmente
+        e.preventDefault();
+
+        dragDelta = dx;
+        const base = -currentIndex * 100; // en %
+        const dragPct = (dx / window.innerWidth) * 100;
+        // Resistencia en los extremos
+        let pct = base + dragPct;
+        if (currentIndex === 0 && dx > 0) pct = base + dragPct * 0.25;
+        if (currentIndex === allCards.length - 1 && dx < 0) pct = base + dragPct * 0.25;
+        if (previewTrack) previewTrack.style.transform = `translateX(${pct}%)`;
+    }
+
+    function onSwipeEnd(e) {
+        if (!swipeActive) return;
+        swipeActive = false;
+
+        if (swipeDir === 'h') {
+            if (dragDelta < -SWIPE_THRESHOLD) goTo(currentIndex + 1);
+            else if (dragDelta > SWIPE_THRESHOLD) goTo(currentIndex - 1);
+            else goTo(currentIndex); // volver al actual
+        }
+        swipeDir = null;
+        dragDelta = 0;
+    }
+
+    // ---------- Cerrar overlay ----------
+    function closePreview() {
+        overlay.style.display = 'none';
+        overlay.classList.remove('active');
+        const container = document.getElementById('preview-container');
+        container.innerHTML = '';
+        previewTrack = null;
+    }
+
+    closeBtn.addEventListener('click', closePreview);
+
+    // Cerrar al tocar el fondo (no el contenido)
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closePreview();
+    });
+
+    // Cerrar con tecla Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.style.display === 'flex') closePreview();
+        if (e.key === 'ArrowRight' && overlay.style.display === 'flex') goTo(currentIndex + 1);
+        if (e.key === 'ArrowLeft'  && overlay.style.display === 'flex') goTo(currentIndex - 1);
+    });
+
+    // ---------- Abrir al hacer clic/tap en una imagen del feed ----------
     feed.addEventListener('click', function(e) {
         const carousel = e.target.closest('.post-image-carousel');
         if (!carousel) return;
         if (e.target.closest('.action-btn')) return;
         const postCard = carousel.closest('.post-card');
         if (!postCard) return;
-        openPreview(postCard);
+        const cards = Array.from(feed.querySelectorAll('.post-card'));
+        const idx = cards.indexOf(postCard);
+        openPreview(idx >= 0 ? idx : 0);
     });
 
     feed.addEventListener('touchstart', function(e) {
@@ -549,32 +749,20 @@ function initPostSelection() {
             const endTouch = ev.changedTouches[0];
             const dx = endTouch.clientX - startX;
             const dy = endTouch.clientY - startY;
-            const distance = Math.sqrt(dx*dx + dy*dy);
-            if (distance > 10) {
+            if (Math.sqrt(dx*dx + dy*dy) > 10) {
                 document.removeEventListener('touchend', touchEndHandler);
                 return;
             }
             const postCard = carousel.closest('.post-card');
             if (postCard) {
-                openPreview(postCard);
+                const cards = Array.from(feed.querySelectorAll('.post-card'));
+                const idx = cards.indexOf(postCard);
+                openPreview(idx >= 0 ? idx : 0);
             }
             document.removeEventListener('touchend', touchEndHandler);
         };
-
         document.addEventListener('touchend', touchEndHandler, { passive: true });
     }, { passive: true });
-
-    closeBtn.addEventListener('click', () => {
-        overlay.style.display = 'none';
-        container.innerHTML = '';
-    });
-
-    overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-            overlay.style.display = 'none';
-            container.innerHTML = '';
-        }
-    });
 }
 
 // ------------------------------------------------------------

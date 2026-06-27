@@ -79,10 +79,14 @@
     <!-- Script principal (módulo) -->
     <script type="module" src="script.js"></script>
 
-    <!-- Overlay de previsualización -->
+    <!-- Overlay de previsualización fullscreen -->
     <div id="post-preview-overlay" class="preview-overlay">
         <button id="close-preview" class="close-preview-btn">✕</button>
-        <div id="preview-container" class="preview-content"></div>
+        <!-- El contador y los slides se inyectan por JS -->
+        <div id="preview-container" style="width:100%;height:100%;position:relative;"></div>
+        <!-- Hints de swipe -->
+        <div class="preview-swipe-hint left">‹</div>
+        <div class="preview-swipe-hint right">›</div>
     </div>
 
 </body>
