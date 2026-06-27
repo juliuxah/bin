@@ -19,7 +19,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 // ------------------------------------------------------------
-// FUNCIONES DEL CARRUSEL (sin cambios)
+// FUNCIONES DEL CARRUSEL (solo para preview)
 // ------------------------------------------------------------
 function initCarousel(carouselElement) {
     const container = carouselElement.querySelector('.carousel-container');
@@ -100,14 +100,6 @@ function initCarousel(carouselElement) {
     container.addEventListener('pointerup', handlePointerEnd);
     container.addEventListener('pointercancel', handlePointerEnd);
     window.addEventListener('resize', () => updateCarousel(currentIndex));
-}
-
-function initAllCarousels() {
-    document.querySelectorAll('.post-image-carousel').forEach(carousel => {
-        if (carousel.dataset.initialized) return;
-        initCarousel(carousel);
-        carousel.dataset.initialized = 'true';
-    });
 }
 
 // ------------------------------------------------------------
@@ -291,7 +283,7 @@ function showGlobalNotification(message, color = '#2ecc71') {
 }
 
 // ------------------------------------------------------------
-// CREAR ELEMENTO POST (MODIFICADO: descripción con clase)
+// CREAR ELEMENTO POST (sin carrusel en feed)
 // ------------------------------------------------------------
 function createPostElement(postData, docId) {
     const newPost = document.createElement('div');
@@ -303,10 +295,11 @@ function createPostElement(postData, docId) {
     const image = postData.image || '';
     const isImage = image && image.startsWith('data:image');
     
-    // Descripción ahora con clase, sin estilos en línea
+    // Descripción con clase para ocultar en feed
     const descriptionHTML = description ? 
         `<div class="post-description">${description}</div>` : '';
     
+    // Carrusel con un solo slide (sin indicadores visibles en feed)
     newPost.innerHTML = `
         <div class="post-header-black">${title.toUpperCase()}</div>
         ${descriptionHTML}
@@ -340,7 +333,7 @@ function createPostElement(postData, docId) {
 }
 
 // ------------------------------------------------------------
-// CARGAR POSTS DESDE FIRESTORE
+// CARGAR POSTS DESDE FIRESTORE (sin inicializar carrusel)
 // ------------------------------------------------------------
 async function cargarPostsDesdeLaNube() {
     console.log("🔄 Buscando posts en la nube...");
@@ -366,9 +359,9 @@ async function cargarPostsDesdeLaNube() {
             feed.appendChild(newPost);
         });
 
-        initAllCarousels();
+        // Solo inicializar acciones, NO el carrusel
         initActions();
-        console.log("✅ Posts cargados desde Firestore");
+        console.log("✅ Posts cargados desde Firestore (sin carrusel en feed)");
     } catch (error) {
         console.error("❌ Error al cargar posts:", error);
         feed.innerHTML = `<div class="error-message">Error al cargar las publicaciones. Intenta de nuevo.</div>`;
@@ -377,7 +370,7 @@ async function cargarPostsDesdeLaNube() {
 }
 
 // ------------------------------------------------------------
-// VISTA PREVIA DE POSTS (sin cambios, pero la descripción se muestra)
+// VISTA PREVIA DE POSTS (se abre al hacer clic en la imagen)
 // ------------------------------------------------------------
 function initPostSelection() {
     const feed = document.getElementById('feed');
@@ -385,21 +378,56 @@ function initPostSelection() {
     const container = document.getElementById('preview-container');
     const closeBtn = document.getElementById('close-preview');
 
+    // Función para abrir preview
+    function openPreview(postCard) {
+        const clone = postCard.cloneNode(true);
+        clone.classList.add('preview-card');
+        container.innerHTML = '';
+        container.appendChild(clone);
+        
+        // Asegurar que la descripción se muestre en preview
+        const desc = clone.querySelector('.post-description');
+        if (desc) {
+            desc.style.display = 'block';
+            desc.style.padding = '12px 16px';
+            desc.style.color = 'var(--text-1)';
+            desc.style.fontSize = '16px';
+            desc.style.borderBottom = '1px solid var(--border-vivid)';
+            desc.style.background = 'var(--bg-raised)';
+        }
+        
+        // Inicializar carrusel SOLO en la preview
+        const carousel = clone.querySelector('.post-image-carousel');
+        if (carousel) {
+            carousel.dataset.initialized = '';
+            initCarousel(carousel);
+        }
+        // Inicializar acciones en el clon
+        initActions(clone);
+        
+        overlay.style.display = 'flex';
+    }
+
+    // Evento click: solo si se hace clic en la imagen (o en el contenedor del carrusel)
     feed.addEventListener('click', function(e) {
-        const postCard = e.target.closest('.post-card');
-        if (!postCard) return;
+        const carousel = e.target.closest('.post-image-carousel');
+        if (!carousel) return;
+        // Evitar que se dispare si se hace clic en botones de acción (que están fuera del carrusel)
         if (e.target.closest('.action-btn')) return;
-        if (e.target.closest('.carousel-container')) return;
+        
+        const postCard = carousel.closest('.post-card');
+        if (!postCard) return;
+        
         openPreview(postCard);
     });
 
+    // Evento touch para móviles
     feed.addEventListener('touchstart', function(e) {
         const touch = e.touches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
-        const postCard = target ? target.closest('.post-card') : null;
-        if (!postCard) return;
+        const carousel = target ? target.closest('.post-image-carousel') : null;
+        if (!carousel) return;
         if (target.closest('.action-btn')) return;
-        if (target.closest('.carousel-container')) return;
 
         const startX = touch.clientX;
         const startY = touch.clientY;
@@ -413,40 +441,17 @@ function initPostSelection() {
                 document.removeEventListener('touchend', touchEndHandler);
                 return;
             }
-            openPreview(postCard);
+            const postCard = carousel.closest('.post-card');
+            if (postCard) {
+                openPreview(postCard);
+            }
             document.removeEventListener('touchend', touchEndHandler);
         };
 
         document.addEventListener('touchend', touchEndHandler, { passive: true });
     }, { passive: true });
 
-    function openPreview(postCard) {
-        const clone = postCard.cloneNode(true);
-        clone.classList.add('preview-card');
-        container.innerHTML = '';
-        container.appendChild(clone);
-        
-        // Aseguramos que la descripción se muestre con estilos adecuados en la preview
-        const desc = clone.querySelector('.post-description');
-        if (desc) {
-            desc.style.display = 'block';
-            desc.style.padding = '12px 16px';
-            desc.style.color = 'var(--text-1)';
-            desc.style.fontSize = '16px';
-            desc.style.borderBottom = '1px solid var(--border-vivid)';
-            desc.style.background = 'var(--bg-raised)';
-        }
-        
-        const carousel = clone.querySelector('.post-image-carousel');
-        if (carousel) {
-            carousel.dataset.initialized = '';
-            initCarousel(carousel);
-        }
-        initActions(clone);
-        
-        overlay.style.display = 'flex';
-    }
-
+    // Cerrar preview
     closeBtn.addEventListener('click', () => {
         overlay.style.display = 'none';
         container.innerHTML = '';
@@ -532,14 +537,18 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(style);
     }
 
-    initAllCarousels();
+    // Inicializar acciones (los carruseles no se inicializan en feed)
     initActions();
 
+    // Escuchar autenticación
     onAuthStateChanged(auth, (user) => {
         updateAuthUI(user);
     });
 
+    // Cargar posts
     cargarPostsDesdeLaNube();
+
+    // Inicializar vista previa (con clic en imagen)
     initPostSelection();
 
     // ------------------------------------------------------------
