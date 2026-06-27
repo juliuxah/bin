@@ -340,35 +340,40 @@ function createPostElement(postData, docId) {
 }
 
 // ------------------------------------------------------------
-// CARGAR POSTS DESDE FIRESTORE (CORREGIDO)
+// CARGAR POSTS DESDE FIRESTORE (CORREGIDO CON MENSAJE DE CARGA)
 // ------------------------------------------------------------
 async function cargarPostsDesdeLaNube() {
     console.log("🔄 Buscando posts en la nube...");
     const feed = document.getElementById('feed');
     if (!feed) return;
 
+    // Mostrar mensaje de carga
+    feed.innerHTML = `<div class="loading-message">Cargando publicaciones…</div>`;
+
     try {
-        // Consulta ordenada por fecha (asegúrate de que el campo 'fecha' exista)
         const q = query(collection(db, "posts"), orderBy("fecha", "desc"));
         const querySnapshot = await getDocs(q);
 
-        // Limpiar el feed
+        // Limpiar feed
         feed.innerHTML = '';
 
-        // Crear cada post y agregarlo
+        if (querySnapshot.empty) {
+            feed.innerHTML = `<div class="empty-message">No hay publicaciones aún. ¡Crea la primera!</div>`;
+            return;
+        }
+
         querySnapshot.forEach((doc) => {
             const postData = doc.data();
-            const newPost = createPostElement(postData, doc.id); // ¡ID correcto!
+            const newPost = createPostElement(postData, doc.id);
             feed.appendChild(newPost);
         });
 
-        // Inicializar carruseles y acciones en los nuevos posts
         initAllCarousels();
         initActions();
-
         console.log("✅ Posts cargados desde Firestore");
     } catch (error) {
         console.error("❌ Error al cargar posts:", error);
+        feed.innerHTML = `<div class="error-message">Error al cargar las publicaciones. Intenta de nuevo.</div>`;
         showGlobalNotification('Error al cargar los posts. Intenta de nuevo.', '#e74c3c');
     }
 }
@@ -450,6 +455,43 @@ function initPostSelection() {
 // INICIALIZACIÓN AL CARGAR EL DOM
 // ------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
+    // Inyectar estilos para mensajes de carga/vacío/error
+    if (!document.getElementById('custom-feed-styles')) {
+        const style = document.createElement('style');
+        style.id = 'custom-feed-styles';
+        style.textContent = `
+            .loading-message,
+            .empty-message,
+            .error-message {
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 40px 20px;
+                color: var(--text-2);
+                font-size: 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+            .loading-message::before {
+                content: '';
+                width: 32px;
+                height: 32px;
+                border: 3px solid var(--border);
+                border-top-color: var(--accent);
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            .error-message {
+                color: var(--like-red);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
     // Inicializar elementos estáticos (si los hay)
     initAllCarousels();
     initActions();
@@ -459,20 +501,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inicializar la vista previa
     initPostSelection();
-
-    // Agregar estilos si no existen
-    if (!document.getElementById('action-styles')) {
-        const style = document.createElement('style');
-        style.id = 'action-styles';
-        style.textContent = `
-            @keyframes slideDown {
-                from { opacity: 0; transform: translateY(-20px) scale(0.95); }
-                to { opacity: 1; transform: translateY(0) scale(1); }
-            }
-            .post-notification { position: relative; z-index: 5; }
-        `;
-        document.head.appendChild(style);
-    }
 
     // ------------------------------------------------------------
     // CÁMARA (sin cambios)
