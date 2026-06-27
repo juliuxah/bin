@@ -29,9 +29,7 @@
 }
 ul, li { list-style: none; }
 
-/* ============================================================
-   FONDO Y CUERPO PRINCIPAL
-   ============================================================ */
+/* FONDO Y CUERPO PRINCIPAL */
 body {
     display: flex;
     justify-content: center;
@@ -42,7 +40,6 @@ body {
     padding: 0;
     margin: 0;
 }
-
 body.dragging {
     overflow: hidden !important;
     touch-action: none !important;
@@ -52,9 +49,7 @@ body.dragging {
     height: 100% !important;
 }
 
-/* ============================================================
-   CONTENEDOR PRINCIPAL
-   ============================================================ */
+/* CONTENEDOR PRINCIPAL */
 .mobile-frame {
     width: 100%;
     max-width: 500px;
@@ -68,22 +63,16 @@ body.dragging {
     flex-direction: column;
     margin: 0 auto;
 }
-
 @media (min-width: 600px) {
     .mobile-frame {
         border-radius: 44px;
         height: 780px;
         max-width: 380px;
-        box-shadow:
-            0 0 0 1px var(--border-vivid),
-            0 40px 80px rgba(0, 0, 0, 0.9),
-            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        box-shadow: 0 0 0 1px var(--border-vivid), 0 40px 80px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
     }
 }
 
-/* ============================================================
-   BARRA SUPERIOR — TÍTULO "BIN"
-   ============================================================ */
+/* BARRA SUPERIOR */
 .top-gradient {
     position: absolute;
     top: 0;
@@ -98,7 +87,6 @@ body.dragging {
     border-bottom: 1px solid var(--border);
     pointer-events: none;
 }
-
 .app-title {
     font-size: 26px;
     font-weight: 900;
@@ -108,9 +96,7 @@ body.dragging {
     text-shadow: 0 0 30px rgba(192, 132, 252, 0.5);
 }
 
-/* ============================================================
-   NAVEGACIÓN SUPERIOR
-   ============================================================ */
+/* NAVEGACIÓN SUPERIOR */
 .top-nav {
     position: absolute;
     top: 70px;
@@ -127,8 +113,6 @@ body.dragging {
     z-index: 10;
     border-radius: 0;
 }
-
-/* Botón crear post — verde neón */
 .create-post-btn {
     width: 40px;
     height: 40px;
@@ -154,8 +138,6 @@ body.dragging {
     font-weight: 400;
     line-height: 1;
 }
-
-/* ===== NUEVOS BOTONES DE AUTENTICACIÓN ===== */
 .nav-auth-btn {
     width: 40px;
     height: 40px;
@@ -180,9 +162,6 @@ body.dragging {
     font-size: 18px;
     line-height: 1;
 }
-/* ========================================== */
-
-/* Drop zones — círculos de perfil */
 .top-nav .drop-zone {
     width: 44px;
     height: 44px;
@@ -192,8 +171,7 @@ body.dragging {
     align-items: center;
     justify-content: center;
     position: relative;
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-                box-shadow 0.25s ease;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
     box-shadow: 0 0 0 2px var(--border-vivid);
     flex-shrink: 0;
     cursor: pointer;
@@ -205,14 +183,6 @@ body.dragging {
     object-fit: cover;
     border-radius: 50%;
     display: block;
-}
-.top-nav .drop-zone .plus {
-    position: absolute;
-    bottom: -2px;
-    right: 2px;
-    font-size: 14px;
-    color: var(--accent);
-    font-weight: 700;
 }
 .top-nav .drop-zone.hovered {
     box-shadow: 0 0 0 3px var(--accent), 0 0 28px rgba(192, 132, 252, 0.5) !important;
@@ -235,8 +205,6 @@ body.dragging {
     0%   { transform: scale(1); opacity: 1; }
     100% { transform: scale(1.6); opacity: 0; }
 }
-
-/* Icono de cámara */
 .top-nav .camera-icon {
     margin-left: auto;
     font-size: 22px;
@@ -260,9 +228,7 @@ body.dragging {
     border-color: var(--border-vivid);
 }
 
-/* ============================================================
-   FEED EN GRID 4×N
-   ============================================================ */
+/* FEED EN GRID 3×N */
 .feed-container {
     position: absolute;
     top: 142px;
@@ -271,9 +237,9 @@ body.dragging {
     bottom: 0;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 4px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 6px;
     align-content: start;
     -webkit-overflow-scrolling: touch;
 }
@@ -283,19 +249,16 @@ body.dragging {
     touch-action: none !important;
 }
 
-/* ============================================================
-   TARJETA DE POST (más compacta)
-   ============================================================ */
+/* ===== TARJETA DE POST (ligeramente alargada: 4:5) ===== */
 .post-card {
     background: var(--bg-surface);
     border-radius: var(--radius-card);
     overflow: hidden;
     border: 1px solid var(--border);
     width: 100%;
+    aspect-ratio: 4 / 5;               /* ← más alto que ancho */
     display: flex;
     flex-direction: column;
-    height: auto;
-    min-height: 0; /* elimina altura mínima fija */
     cursor: pointer;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -307,43 +270,50 @@ body.dragging {
     opacity: 0.2;
 }
 
-/* ===== OCULTAR DESCRIPCIÓN/TÍTULO EN EL FEED ===== */
-.feed-container .post-card .post-header-black {
-    display: none;
-}
-/* Si el script usa otra clase para la descripción, también la ocultamos */
+/* Ocultar descripción y título en el feed */
+.feed-container .post-card .post-header-black,
 .feed-container .post-card .post-description,
 .feed-container .post-card .post-title {
-    display: none;
+    display: none !important;
 }
 
-/* Cabecera negra — etiqueta del post (visible en preview) */
+/* Cabecera negra (visible en preview) */
 .post-header-black {
     background: var(--bg-raised);
     color: var(--accent);
     text-align: center;
-    padding: 3px 2px;
+    padding: 4px 2px;
     font-weight: 700;
-    font-size: 7px;
+    font-size: 8px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     flex-shrink: 0;
     border-bottom: 1px solid var(--border);
 }
+/* Descripción (visible en preview) */
+.post-description {
+    padding: 12px 16px;
+    color: var(--text-1);
+    font-size: 16px;
+    border-bottom: 1px solid var(--border-vivid);
+    background: var(--bg-raised);
+    display: block;
+}
 
-/* Cabecera de usuario (más pequeña) */
+/* Cabecera de usuario */
 .post-header-user {
     display: flex;
     align-items: center;
-    padding: 3px 4px;
+    padding: 4px 6px;
     gap: 4px;
     flex-shrink: 0;
     background: var(--bg-raised);
     border-bottom: 1px solid var(--border);
+    height: 28px;  /* un poco más alto para compensar */
 }
 .post-header-user .avatar {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     background: var(--bg-surface);
     border-radius: 50%;
     flex-shrink: 0;
@@ -351,42 +321,26 @@ body.dragging {
 }
 .post-header-user .user-lines { flex: 1; }
 .post-header-user .user-lines div {
-    height: 3px;
+    height: 4px;
     background: var(--bg-surface);
     margin: 1px 0;
     border-radius: 2px;
     border: 1px solid var(--border);
 }
-.post-header-user .user-lines div:nth-child(1) { width: 30px; }
-.post-header-user .user-lines div:nth-child(2) { width: 20px; }
+.post-header-user .user-lines div:nth-child(1) { width: 32px; }
+.post-header-user .user-lines div:nth-child(2) { width: 22px; }
 
-/* ============================================================
-   CARRUSEL (cuadrado para que ocupe menos)
-   ============================================================ */
+/* CARRUSEL (ocupa el espacio restante) */
 .post-image-carousel {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    flex: 1;
     position: relative;
     overflow: hidden;
     cursor: grab;
     touch-action: pan-y;
-    flex-shrink: 0;
     background: var(--bg-raised);
 }
-@supports not (aspect-ratio: 1/1) {
-    .post-image-carousel {
-        height: 0;
-        padding-bottom: 100%;
-        position: relative;
-    }
-    .post-image-carousel .carousel-container {
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 100%;
-    }
-}
 .post-image-carousel.dragging { cursor: grabbing; }
-
 .carousel-container {
     width: 100%;
     height: 100%;
@@ -422,37 +376,7 @@ body.dragging {
     display: block;
 }
 
-/* Slides de color (sin cambios) */
-.slide-1a { background: linear-gradient(135deg, #7c3aed, #4c1d95); }
-.slide-1b { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-.slide-1c { background: linear-gradient(135deg, #6d28d9, #5b21b6); }
-.slide-1d { background: linear-gradient(135deg, #5b21b6, #7c3aed); }
-.slide-2a { background: linear-gradient(135deg, #be185d, #831843); }
-.slide-2b { background: linear-gradient(135deg, #ec4899, #be185d); }
-.slide-2c { background: linear-gradient(135deg, #9d174d, #be185d); }
-.slide-2d { background: linear-gradient(135deg, #be185d, #db2777); }
-.slide-3a { background: linear-gradient(135deg, #065f46, #064e3b); }
-.slide-3b { background: linear-gradient(135deg, #059669, #065f46); }
-.slide-3c { background: linear-gradient(135deg, #047857, #065f46); }
-.slide-3d { background: linear-gradient(135deg, #065f46, #10b981); }
-.slide-4a { background: linear-gradient(135deg, #1e40af, #1e3a8a); }
-.slide-4b { background: linear-gradient(135deg, #2563eb, #1e40af); }
-.slide-4c { background: linear-gradient(135deg, #1d4ed8, #1e40af); }
-.slide-4d { background: linear-gradient(135deg, #1e40af, #3b82f6); }
-.slide-5a { background: linear-gradient(135deg, #b45309, #92400e); }
-.slide-5b { background: linear-gradient(135deg, #d97706, #b45309); }
-.slide-5c { background: linear-gradient(135deg, #92400e, #b45309); }
-.slide-5d { background: linear-gradient(135deg, #b45309, #f59e0b); }
-.slide-6a { background: linear-gradient(135deg, #991b1b, #7f1d1d); }
-.slide-6b { background: linear-gradient(135deg, #dc2626, #991b1b); }
-.slide-6c { background: linear-gradient(135deg, #b91c1c, #991b1b); }
-.slide-6d { background: linear-gradient(135deg, #991b1b, #ef4444); }
-.slide-7a { background: linear-gradient(135deg, #0e7490, #164e63); }
-.slide-7b { background: linear-gradient(135deg, #0891b2, #0e7490); }
-.slide-7c { background: linear-gradient(135deg, #0c7490, #0e7490); }
-.slide-7d { background: linear-gradient(135deg, #0e7490, #22d3ee); }
-
-/* Indicadores del carrusel (más pequeños) */
+/* Indicadores del carrusel */
 .carousel-indicators {
     position: absolute;
     bottom: 4px;
@@ -481,33 +405,31 @@ body.dragging {
     box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
 }
 
-/* ============================================================
-   ACCIONES DEL POST (más compactas)
-   ============================================================ */
+/* ACCIONES DEL POST */
 .post-actions {
-    padding: 3px 4px;
+    padding: 4px 6px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
     border-top: 1px solid var(--border);
     flex-shrink: 0;
     background: var(--bg-surface);
+    height: 28px;
 }
 .post-actions .stars { display: none; }
-
 .post-actions .action-btn {
     background: none;
     border: none;
-    font-size: 10px;
+    font-size: 11px;
     cursor: pointer;
-    padding: 2px 3px;
+    padding: 2px 4px;
     border-radius: 4px;
     transition: background 0.15s, transform 0.15s, color 0.15s;
     color: var(--text-2);
     display: flex;
     align-items: center;
-    gap: 1px;
+    gap: 2px;
     font-weight: 500;
 }
 .post-actions .action-btn:hover {
@@ -521,17 +443,15 @@ body.dragging {
     color: var(--like-red);
 }
 .post-actions .action-btn .count {
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 600;
     color: var(--text-2);
 }
 .post-actions .action-btn .icon {
-    font-size: 10px;
+    font-size: 11px;
 }
 
-/* ============================================================
-   DRAG PREVIEW
-   ============================================================ */
+/* DRAG PREVIEW */
 #drag-element {
     position: fixed;
     width: 110px;
@@ -556,9 +476,7 @@ body.dragging {
     backface-visibility: hidden;
 }
 
-/* ============================================================
-   BARRA INFERIOR
-   ============================================================ */
+/* BARRA INFERIOR */
 .bottom-nav {
     position: absolute;
     bottom: 0;
@@ -569,9 +487,7 @@ body.dragging {
     z-index: 5;
 }
 
-/* ============================================================
-   OVERLAY DE CÁMARA
-   ============================================================ */
+/* OVERLAY DE CÁMARA */
 .camera-overlay {
     position: absolute;
     top: 0; left: 0;
@@ -605,7 +521,6 @@ body.dragging {
 }
 .camera-fallback span { font-size: 38px; opacity: 0.7; }
 .camera-fallback p   { color: var(--text-2); font-size: 15px; letter-spacing: 1px; }
-
 .close-camera-btn {
     position: absolute;
     top: 20px; right: 20px;
@@ -626,7 +541,6 @@ body.dragging {
     background: rgba(239, 68, 68, 0.5);
     border-color: rgba(239, 68, 68, 0.6);
 }
-
 .camera-shutter {
     width: 68px; height: 68px;
     background: rgba(255, 255, 255, 0.88);
@@ -643,9 +557,7 @@ body.dragging {
     box-shadow: 0 4px 30px rgba(192, 132, 252, 0.6);
 }
 
-/* ============================================================
-   ANIMACIONES
-   ============================================================ */
+/* ANIMACIONES */
 @keyframes slideDown {
     from { opacity: 0; transform: translateX(-50%) translateY(-30px) scale(0.95); }
     to   { opacity: 1; transform: translateX(-50%) translateY(0)     scale(1);    }
@@ -654,12 +566,9 @@ body.dragging {
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
 .saved-post-banner { display: none; }
 
-/* ============================================================
-   OVERLAY DE PREVISUALIZACIÓN
-   ============================================================ */
+/* OVERLAY DE PREVISUALIZACIÓN */
 .preview-overlay {
     display: none;
     position: fixed;
@@ -696,7 +605,6 @@ body.dragging {
     background: var(--accent-dim);
     border-color: var(--accent);
 }
-
 .preview-content {
     width: 90%;
     max-width: 500px;
@@ -709,16 +617,13 @@ body.dragging {
     position: relative;
     box-shadow: 0 0 60px rgba(192, 132, 252, 0.15);
 }
-
 #preview-container .post-card {
     box-shadow: none;
     border: none;
     margin: 0;
 }
 
-/* ============================================================
-   ESTILOS PARA LA VISTA PREVIA (botones grandes)
-   ============================================================ */
+/* ESTILOS PARA LA VISTA PREVIA (botones grandes) */
 .preview-content .post-card.preview-card .post-actions .action-btn {
     font-size: 26px !important;
     padding: 10px 18px !important;
@@ -745,7 +650,7 @@ body.dragging {
     padding: 12px;
     color: var(--accent);
     letter-spacing: 3px;
-    display: block !important; /* Aseguramos que se vea en la preview */
+    display: block !important;
 }
 .preview-content .post-card.preview-card .post-header-user {
     padding: 12px;
@@ -758,15 +663,14 @@ body.dragging {
 }
 .preview-content .post-card.preview-card .post-image-carousel {
     aspect-ratio: 16/9;
+    flex: none;
 }
 .preview-content .post-card.preview-card {
     border-radius: 14px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.5);
 }
 
-/* ============================================================
-   PANTALLAS PEQUEÑAS (<400px) – mantenemos 4 columnas
-   ============================================================ */
+/* PANTALLAS PEQUEÑAS (<400px) – mantenemos 3 columnas y ajustamos tamaños */
 @media (max-width: 400px) {
     .top-nav {
         padding: 0 10px;
@@ -792,25 +696,26 @@ body.dragging {
     }
     .feed-container {
         padding: 4px 3px;
-        gap: 3px;
-        grid-template-columns: repeat(4, 1fr);
+        gap: 4px;
+        grid-template-columns: repeat(3, 1fr);
     }
-    .post-header-black {
-        font-size: 6px;
-        padding: 2px 1px;
-        letter-spacing: 1px;
+    .post-header-user {
+        height: 22px;
+        padding: 2px 4px;
     }
-    .post-header-user { padding: 2px 3px; gap: 3px; }
     .post-header-user .avatar { width: 14px; height: 14px; }
     .post-header-user .user-lines div {
-        height: 2px; margin: 1px 0;
+        height: 3px; margin: 1px 0;
     }
     .post-header-user .user-lines div:nth-child(1) { width: 20px; }
     .post-header-user .user-lines div:nth-child(2) { width: 14px; }
-    .post-actions { padding: 2px 3px; gap: 2px; }
-    .post-actions .action-btn { font-size: 8px; padding: 1px 2px; }
-    .post-actions .action-btn .icon  { font-size: 8px; }
-    .post-actions .action-btn .count { font-size: 7px; }
+    .post-actions {
+        height: 22px;
+        padding: 2px 4px;
+    }
+    .post-actions .action-btn { font-size: 9px; padding: 1px 3px; }
+    .post-actions .action-btn .icon  { font-size: 9px; }
+    .post-actions .action-btn .count { font-size: 8px; }
     .carousel-indicators {
         bottom: 3px; padding: 2px 4px; gap: 2px;
     }
