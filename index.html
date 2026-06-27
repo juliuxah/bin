@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BIN - Social</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        html, body {
+            touch-action: manipulation;
+            -webkit-text-size-adjust: 100%;
+        }
+        * {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-frame">
+
+        <!-- Barra superior -->
+        <div class="top-gradient">
+            <div class="app-title">BIN</div>
+        </div>
+
+        <!-- Navegación SUPERIOR -->
+        <div class="top-nav">
+            <a href="crear-post.html" class="create-post-btn" title="Crear nuevo post">
+                <span class="plus-icon">+</span>
+            </a>
+            <!-- Círculos con fotos de perfil -->
+            <div class="drop-zone"><img src="imagenes/perfiles/pou.jpg" alt="Pou"></div>
+            <div class="drop-zone"><img src="imagenes/perfiles/dwey.jpg" alt="Dwey"></div>
+            <div class="drop-zone"><img src="imagenes/perfiles/pepe.jpg" alt="Pepe"></div>
+            <div id="camera-btn" class="camera-icon"></div>
+        </div>
+
+        <!-- Feed -->
+        <div class="feed-container" id="feed">
+
+            <!-- Post 1 -->
+            <div class="post-card static-post">
+                <div class="post-header-black">POST NAME</div>
+                <div class="post-image-carousel draggable-post" data-post-id="1">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-1">
+                            <div class="carousel-slide slide-1a"><img src="imagenes/post/1.jpg" alt="Post 1"></div>
+                            <div class="carousel-slide slide-1b"><img src="imagenes/post/2.jpg" alt="Post 2"></div>
+                            <div class="carousel-slide slide-1c"><img src="imagenes/post/3.jpg" alt="Post 3"></div>
+                            <div class="carousel-slide slide-1d"><img src="imagenes/post/4.jpg" alt="Post 4"></div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="stars">★★★</div>
+                    <button class="action-btn like-btn" data-id="1">
+                        <span class="icon">♡</span>
+                        <span class="count">12</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="1">
+                        <span class="icon">💬</span>
+                        <span class="count">5</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="1">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 2 -->
+            <div class="post-card static-post">
+                <div class="post-header-user">
+                    <div class="avatar"></div>
+                    <div class="user-lines"><div></div><div></div></div>
+                </div>
+                <div class="post-image-carousel draggable-post" data-post-id="2">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-2">
+                            <div class="carousel-slide slide-2a">1</div>
+                            <div class="carousel-slide slide-2b">2</div>
+                            <div class="carousel-slide slide-2c">3</div>
+                            <div class="carousel-slide slide-2d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn" data-id="2">
+                        <span class="icon">♡</span>
+                        <span class="count">8</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="2">
+                        <span class="icon">💬</span>
+                        <span class="count">3</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="2">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 3 -->
+            <div class="post-card static-post">
+                <div class="post-header-black">NATURE POST</div>
+                <div class="post-image-carousel draggable-post" data-post-id="3">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-3">
+                            <div class="carousel-slide slide-3a">1</div>
+                            <div class="carousel-slide slide-3b">2</div>
+                            <div class="carousel-slide slide-3c">3</div>
+                            <div class="carousel-slide slide-3d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn" data-id="3">
+                        <span class="icon">♡</span>
+                        <span class="count">22</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="3">
+                        <span class="icon">💬</span>
+                        <span class="count">9</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="3">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 4 -->
+            <div class="post-card static-post">
+                <div class="post-header-user">
+                    <div class="avatar" style="background: #3b82f6; border-color: rgba(59,130,246,0.4);"></div>
+                    <div class="user-lines">
+                        <div style="width:70px; background:#1e3a8a;"></div>
+                        <div style="width:45px; background:#1e3a8a;"></div>
+                    </div>
+                </div>
+                <div class="post-image-carousel draggable-post" data-post-id="4">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-4">
+                            <div class="carousel-slide slide-4a">1</div>
+                            <div class="carousel-slide slide-4b">2</div>
+                            <div class="carousel-slide slide-4c">3</div>
+                            <div class="carousel-slide slide-4d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn" data-id="4">
+                        <span class="icon">♡</span>
+                        <span class="count">6</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="4">
+                        <span class="icon">💬</span>
+                        <span class="count">2</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="4">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 5 -->
+            <div class="post-card static-post">
+                <div class="post-header-black">TRENDING</div>
+                <div class="post-image-carousel draggable-post" data-post-id="5">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-5">
+                            <div class="carousel-slide slide-5a">1</div>
+                            <div class="carousel-slide slide-5b">2</div>
+                            <div class="carousel-slide slide-5c">3</div>
+                            <div class="carousel-slide slide-5d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="stars">★★★★★</div>
+                    <button class="action-btn like-btn" data-id="5">
+                        <span class="icon">♡</span>
+                        <span class="count">42</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="5">
+                        <span class="icon">💬</span>
+                        <span class="count">15</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="5">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 6 -->
+            <div class="post-card static-post">
+                <div class="post-header-user">
+                    <div class="avatar" style="background: #db2777; border-color: rgba(219,39,119,0.4);"></div>
+                    <div class="user-lines">
+                        <div style="width:55px; background:#831843;"></div>
+                        <div style="width:35px; background:#831843;"></div>
+                    </div>
+                </div>
+                <div class="post-image-carousel draggable-post" data-post-id="6">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-6">
+                            <div class="carousel-slide slide-6a">1</div>
+                            <div class="carousel-slide slide-6b">2</div>
+                            <div class="carousel-slide slide-6c">3</div>
+                            <div class="carousel-slide slide-6d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <button class="action-btn like-btn" data-id="6">
+                        <span class="icon">♡</span>
+                        <span class="count">18</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="6">
+                        <span class="icon">💬</span>
+                        <span class="count">7</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="6">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Post 7 -->
+            <div class="post-card static-post">
+                <div class="post-header-black">SPECIAL</div>
+                <div class="post-image-carousel draggable-post" data-post-id="7">
+                    <div class="carousel-container">
+                        <div class="carousel-track" id="carousel-7">
+                            <div class="carousel-slide slide-7a">1</div>
+                            <div class="carousel-slide slide-7b">2</div>
+                            <div class="carousel-slide slide-7c">3</div>
+                            <div class="carousel-slide slide-7d">4</div>
+                        </div>
+                        <div class="carousel-indicators">
+                            <span class="dot active" data-index="0"></span>
+                            <span class="dot" data-index="1"></span>
+                            <span class="dot" data-index="2"></span>
+                            <span class="dot" data-index="3"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="post-actions">
+                    <div class="stars">★★★★</div>
+                    <button class="action-btn like-btn" data-id="7">
+                        <span class="icon">♡</span>
+                        <span class="count">31</span>
+                    </button>
+                    <button class="action-btn comment-btn" data-id="7">
+                        <span class="icon">💬</span>
+                        <span class="count">11</span>
+                    </button>
+                    <button class="action-btn share-btn" data-id="7">
+                        <span class="icon">➤</span>
+                    </button>
+                </div>
+            </div>
+
+        </div><!-- /feed -->
+
+        <!-- Cámara (overlay) -->
+        <div id="camera-overlay" class="camera-overlay">
+            <video id="webcam" autoplay playsinline></video>
+            <div id="camera-fallback" class="camera-fallback">
+                <span>📷 Cámara Simulada</span>
+                <p>Abierta correctamente</p>
+            </div>
+            <button id="close-camera" class="close-camera-btn">✕</button>
+            <div class="camera-shutter"></div>
+        </div>
+
+        <!-- Barra inferior -->
+        <div class="bottom-nav"></div>
+
+    </div>
+
+    <div id="drag-element"></div>
+
+    <!-- Cambia tu etiqueta tradicional por esta -->
+<script type="module" src="script.js"></script>
+
+    <div id="post-preview-overlay" class="preview-overlay">
+        <button id="close-preview" class="close-preview-btn">✕</button>
+        <div id="preview-container" class="preview-content"></div>
+    </div>
+
+</body>
+</html>
