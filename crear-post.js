@@ -1,8 +1,9 @@
 // ============================================================
-// 1. IMPORTAR FIREBASE
+// 1. IMPORTAR FIREBASE (AÑADIMOS getAuth y onAuthStateChanged)
 // ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"; // <-- NUEVO
 
 console.log('✅ Módulos Firebase importados correctamente.');
 
@@ -20,7 +21,8 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-console.log('✅ Firebase inicializado. Base de datos lista.');
+const auth = getAuth(app); // <-- NUEVO
+console.log('✅ Firebase inicializado. Base de datos y Auth listos.');
 
 // ============================================================
 // 3. ESPERAR A QUE EL DOM ESTÉ LISTO
@@ -41,18 +43,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const publishBtn = document.getElementById('publish-btn');
     const successMessage = document.getElementById('success-message');
 
-    // Verificar que todos los elementos existen
-    console.log('🔍 Elementos del DOM:', {
-        titleInput: !!titleInput,
-        descriptionInput: !!descriptionInput,
-        imageInput: !!imageInput,
-        publishBtn: !!publishBtn,
-        successMessage: !!successMessage
-    });
-
     let selectedFile = null;
+    let isUserAuthenticated = false; // <-- NUEVO
 
-    // --- Contador de caracteres ---
+    // --- CONTADORES (sin cambios) ---
     titleInput.addEventListener('input', function() {
         titleCount.textContent = this.value.length;
     });
@@ -60,31 +54,27 @@ document.addEventListener('DOMContentLoaded', function() {
         descCount.textContent = this.value.length;
     });
 
-    // --- Selección de imagen ---
+    // --- SELECCIÓN DE IMAGEN (sin cambios) ---
     imageInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
-        if (!file) {
-            console.warn('⚠️ No se seleccionó ningún archivo.');
-            return;
-        }
+        if (!file) return;
         selectedFile = file;
-        console.log(`📸 Archivo seleccionado: ${file.name} (${(file.size / 1024).toFixed(2)} KB)`);
-
         const reader = new FileReader();
         reader.onload = function(ev) {
             previewImg.src = ev.target.result;
             previewContainer.style.display = 'block';
             uploadArea.style.display = 'none';
-            publishBtn.disabled = false;
+            // Solo habilitamos publicar si el usuario está autenticado
+            if (isUserAuthenticated) {
+                publishBtn.disabled = false;
+            }
             successMessage.style.display = 'none';
-            console.log('✅ Vista previa de imagen cargada.');
         };
         reader.readAsDataURL(file);
     });
 
-    // --- Eliminar imagen ---
+    // --- ELIMINAR IMAGEN (sin cambios) ---
     removeImageBtn.addEventListener('click', function() {
-        console.log('🗑️ Eliminando imagen seleccionada.');
         selectedFile = null;
         previewContainer.style.display = 'none';
         uploadArea.style.display = 'flex';
@@ -93,7 +83,7 @@ document.addEventListener('DOMContentLoaded', function() {
         successMessage.style.display = 'none';
     });
 
-    // --- Función para comprimir imagen (reduce tamaño) ---
+    // --- COMPRIMIR IMAGEN (sin cambios) ---
     function compressImage(dataUrl, maxWidth = 800, quality = 0.7) {
         return new Promise((resolve) => {
             const img = new Image();
@@ -115,9 +105,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // --- Publicar en Firestore ---
+    // --- PUBLICAR (con verificación de autenticación) ---
     publishBtn.addEventListener('click', async function() {
-        console.log('🚀 Click en PUBLICAR.');
+        // Verificar autenticación antes de publicar (doble seguridad)
+        if (!isUserAuthenticated) {
+            alert('Debes iniciar sesión para publicar.');
+            window.location.href = 'login.html';
+            return;
+        }
 
         if (!selectedFile) {
             alert('Por favor, selecciona una imagen.');
@@ -126,32 +121,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const title = titleInput.value.trim() || 'NUEVO POST';
         const description = descriptionInput.value.trim() || '';
-        console.log(`📝 Título: "${title}"`);
-        console.log(`📄 Descripción: "${description}"`);
 
-        // Leer la imagen como DataURL
         const reader = new FileReader();
         reader.onload = async function(ev) {
             try {
-                // Comprimir la imagen para no exceder el límite de 1MB de Firestore
-                console.log('🔄 Comprimiendo imagen...');
                 const compressedImage = await compressImage(ev.target.result);
-                console.log(`✅ Imagen comprimida. Tamaño: ${(compressedImage.length / 1024).toFixed(2)} KB`);
-
-                // Datos del post
                 const postData = {
                     title: title,
                     description: description,
                     image: compressedImage,
-                    fecha: new Date()  // campo para ordenar en el feed
+                    fecha: new Date()
                 };
 
-                // Guardar en Firestore
-                console.log('⏳ Enviando datos a Firestore...');
                 const docRef = await addDoc(collection(db, "posts"), postData);
                 console.log(`✅ Post guardado con ID: ${docRef.id}`);
 
-                // Mostrar mensaje de éxito
                 successMessage.style.display = 'block';
                 publishBtn.disabled = true;
 
@@ -165,8 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 uploadArea.style.display = 'flex';
                 imageInput.value = '';
 
-                // Redirigir al feed
-                console.log('⏳ Redirigiendo a index.html en 1.5 segundos...');
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1500);
@@ -179,19 +161,17 @@ document.addEventListener('DOMContentLoaded', function() {
         reader.readAsDataURL(selectedFile);
     });
 
-    // --- Drag & Drop ---
+    // --- DRAG & DROP (sin cambios) ---
     uploadArea.addEventListener('dragover', function(e) {
         e.preventDefault();
         this.style.borderColor = '#7ed957';
         this.style.background = '#f4fcf4';
     });
-
     uploadArea.addEventListener('dragleave', function(e) {
         e.preventDefault();
         this.style.borderColor = '#d0d0d0';
         this.style.background = '#fafafa';
     });
-
     uploadArea.addEventListener('drop', function(e) {
         e.preventDefault();
         this.style.borderColor = '#d0d0d0';
@@ -200,6 +180,63 @@ document.addEventListener('DOMContentLoaded', function() {
         if (files.length > 0) {
             imageInput.files = files;
             imageInput.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // ============================================================
+    // 4. VERIFICAR AUTENTICACIÓN AL CARGAR LA PÁGINA
+    // ============================================================
+    console.log('🔐 Verificando estado de autenticación...');
+
+    // Mostrar un mensaje de carga mientras se verifica
+    const loadingMsg = document.createElement('div');
+    loadingMsg.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center;
+        color: white; font-size: 20px; z-index: 9999; backdrop-filter: blur(4px);
+    `;
+    loadingMsg.textContent = '⏳ Verificando sesión...';
+    document.body.appendChild(loadingMsg);
+
+    // Escuchar cambios en el estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+        // Quitamos el mensaje de carga
+        if (loadingMsg.parentNode) loadingMsg.remove();
+
+        if (user) {
+            // Usuario autenticado
+            console.log(`✅ Usuario autenticado: ${user.email || user.displayName}`);
+            isUserAuthenticated = true;
+            // Habilitar el botón de publicar si ya hay imagen seleccionada
+            if (selectedFile) {
+                publishBtn.disabled = false;
+            }
+            // Podemos mostrar un mensaje de bienvenida (opcional)
+            console.log('✅ Puedes publicar.');
+        } else {
+            // Usuario NO autenticado
+            console.warn('⛔ No hay sesión iniciada. Redirigiendo a login...');
+            isUserAuthenticated = false;
+            publishBtn.disabled = true;
+            // Mostrar mensaje y redirigir después de 1 segundo
+            const warning = document.createElement('div');
+            warning.style.cssText = `
+                position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.85); color: #f87171; padding: 24px 32px;
+                border-radius: 16px; font-size: 18px; z-index: 10000;
+                text-align: center; backdrop-filter: blur(8px);
+                border: 1px solid var(--border-vivid);
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            `;
+            warning.innerHTML = `
+                <div style="font-size: 48px; margin-bottom: 12px;">🔒</div>
+                <p style="font-weight: 600;">Debes iniciar sesión para publicar.</p>
+                <p style="font-size: 14px; color: #aaa; margin-top: 8px;">Redirigiendo al login...</p>
+            `;
+            document.body.appendChild(warning);
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500);
         }
     });
 

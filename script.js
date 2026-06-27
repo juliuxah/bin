@@ -295,11 +295,9 @@ function createPostElement(postData, docId) {
     const image = postData.image || '';
     const isImage = image && image.startsWith('data:image');
     
-    // Descripción con clase para ocultar en feed
     const descriptionHTML = description ? 
         `<div class="post-description">${description}</div>` : '';
     
-    // Carrusel con un solo slide (sin indicadores visibles en feed)
     newPost.innerHTML = `
         <div class="post-header-black">${title.toUpperCase()}</div>
         ${descriptionHTML}
@@ -350,17 +348,18 @@ async function cargarPostsDesdeLaNube() {
 
         if (querySnapshot.empty) {
             feed.innerHTML = `<div class="empty-message">No hay publicaciones aún. ¡Crea la primera!</div>`;
-            return;
+        } else {
+            querySnapshot.forEach((doc) => {
+                const postData = doc.data();
+                const newPost = createPostElement(postData, doc.id);
+                feed.appendChild(newPost);
+            });
+            initActions();
         }
 
-        querySnapshot.forEach((doc) => {
-            const postData = doc.data();
-            const newPost = createPostElement(postData, doc.id);
-            feed.appendChild(newPost);
-        });
+        // Actualizar UI de autenticación para mostrar mensaje si no hay usuario
+        updateAuthUI(auth.currentUser);
 
-        // Solo inicializar acciones, NO el carrusel
-        initActions();
         console.log("✅ Posts cargados desde Firestore (sin carrusel en feed)");
     } catch (error) {
         console.error("❌ Error al cargar posts:", error);
@@ -378,14 +377,12 @@ function initPostSelection() {
     const container = document.getElementById('preview-container');
     const closeBtn = document.getElementById('close-preview');
 
-    // Función para abrir preview
     function openPreview(postCard) {
         const clone = postCard.cloneNode(true);
         clone.classList.add('preview-card');
         container.innerHTML = '';
         container.appendChild(clone);
         
-        // Asegurar que la descripción se muestre en preview
         const desc = clone.querySelector('.post-description');
         if (desc) {
             desc.style.display = 'block';
@@ -396,32 +393,25 @@ function initPostSelection() {
             desc.style.background = 'var(--bg-raised)';
         }
         
-        // Inicializar carrusel SOLO en la preview
         const carousel = clone.querySelector('.post-image-carousel');
         if (carousel) {
             carousel.dataset.initialized = '';
             initCarousel(carousel);
         }
-        // Inicializar acciones en el clon
         initActions(clone);
         
         overlay.style.display = 'flex';
     }
 
-    // Evento click: solo si se hace clic en la imagen (o en el contenedor del carrusel)
     feed.addEventListener('click', function(e) {
         const carousel = e.target.closest('.post-image-carousel');
         if (!carousel) return;
-        // Evitar que se dispare si se hace clic en botones de acción (que están fuera del carrusel)
         if (e.target.closest('.action-btn')) return;
-        
         const postCard = carousel.closest('.post-card');
         if (!postCard) return;
-        
         openPreview(postCard);
     });
 
-    // Evento touch para móviles
     feed.addEventListener('touchstart', function(e) {
         const touch = e.touches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -451,7 +441,6 @@ function initPostSelection() {
         document.addEventListener('touchend', touchEndHandler, { passive: true });
     }, { passive: true });
 
-    // Cerrar preview
     closeBtn.addEventListener('click', () => {
         overlay.style.display = 'none';
         container.innerHTML = '';
@@ -466,7 +455,7 @@ function initPostSelection() {
 }
 
 // ------------------------------------------------------------
-// MANEJO DE AUTENTICACIÓN Y VISIBILIDAD DE BOTONES
+// MANEJO DE AUTENTICACIÓN Y VISIBILIDAD DE BOTONES (CON MENSAJE EN FEED)
 // ------------------------------------------------------------
 function updateAuthUI(user) {
     const registerBtn = document.getElementById('register-btn-nav');
@@ -474,8 +463,11 @@ function updateAuthUI(user) {
     const logoutBtn = document.getElementById('logout-btn');
     const userAvatar = document.getElementById('user-avatar');
     const userAvatarImg = document.getElementById('user-avatar-img');
+    const createPostBtn = document.querySelector('.create-post-btn');
+    const feed = document.getElementById('feed');
 
     if (user) {
+        // Usuario autenticado
         registerBtn.style.display = 'none';
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
@@ -487,12 +479,48 @@ function updateAuthUI(user) {
             userAvatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c3aed&color=fff&size=64`;
         }
         userAvatar.title = user.displayName || 'Usuario';
+        if (createPostBtn) createPostBtn.style.display = 'flex';
+        // Eliminar mensaje de autenticación si existe
+        const authMsg = document.getElementById('auth-message');
+        if (authMsg) authMsg.remove();
     } else {
+        // No autenticado
         registerBtn.style.display = 'flex';
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
         userAvatar.style.display = 'none';
         userAvatarImg.src = '';
+        if (createPostBtn) createPostBtn.style.display = 'none';
+        // Insertar mensaje de autenticación si no existe y el feed está presente
+        if (feed && !document.getElementById('auth-message')) {
+            const msg = document.createElement('div');
+            msg.id = 'auth-message';
+            msg.style.cssText = `
+                grid-column: 1 / -1;
+                text-align: center;
+                padding: 24px 20px;
+                color: var(--text-2);
+                background: var(--bg-surface);
+                border-radius: 12px;
+                border: 1px solid var(--border-vivid);
+                margin-bottom: 8px;
+                font-size: 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            `;
+            msg.innerHTML = `
+                <div style="font-size: 32px;">🔐</div>
+                <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
+                <div style="font-size: 13px; color: var(--text-2);">
+                    <a href="login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
+                    &nbsp;o&nbsp;
+                    <a href="registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
+                </div>
+            `;
+            feed.prepend(msg);
+        }
     }
 }
 
@@ -548,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cargar posts
     cargarPostsDesdeLaNube();
 
-    // Inicializar vista previa (con clic en imagen)
+    // Inicializar vista previa
     initPostSelection();
 
     // ------------------------------------------------------------
