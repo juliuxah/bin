@@ -291,23 +291,21 @@ function showGlobalNotification(message, color = '#2ecc71') {
 }
 
 // ------------------------------------------------------------
-// CREAR ELEMENTO POST (CORREGIDO: recibe docId)
+// CREAR ELEMENTO POST (MODIFICADO: descripción con clase)
 // ------------------------------------------------------------
 function createPostElement(postData, docId) {
     const newPost = document.createElement('div');
     newPost.className = 'post-card saved-post';
     newPost.style.animation = 'fadeIn 0.3s ease both';
     
-    // Valores por defecto para evitar errores
     const title = postData.title || 'Sin título';
     const description = postData.description || '';
     const image = postData.image || '';
     const isImage = image && image.startsWith('data:image');
     
+    // Descripción ahora con clase, sin estilos en línea
     const descriptionHTML = description ? 
-        `<div style="padding: 12px 16px; color: #555; font-size: 14px; border-bottom: 1px solid #f0f0f0; background: #fafafa;">
-            ${description}
-        </div>` : '';
+        `<div class="post-description">${description}</div>` : '';
     
     newPost.innerHTML = `
         <div class="post-header-black">${title.toUpperCase()}</div>
@@ -342,21 +340,19 @@ function createPostElement(postData, docId) {
 }
 
 // ------------------------------------------------------------
-// CARGAR POSTS DESDE FIRESTORE (CORREGIDO CON MENSAJE DE CARGA)
+// CARGAR POSTS DESDE FIRESTORE
 // ------------------------------------------------------------
 async function cargarPostsDesdeLaNube() {
     console.log("🔄 Buscando posts en la nube...");
     const feed = document.getElementById('feed');
     if (!feed) return;
 
-    // Mostrar mensaje de carga
     feed.innerHTML = `<div class="loading-message">Cargando publicaciones…</div>`;
 
     try {
         const q = query(collection(db, "posts"), orderBy("fecha", "desc"));
         const querySnapshot = await getDocs(q);
 
-        // Limpiar feed
         feed.innerHTML = '';
 
         if (querySnapshot.empty) {
@@ -381,7 +377,7 @@ async function cargarPostsDesdeLaNube() {
 }
 
 // ------------------------------------------------------------
-// VISTA PREVIA DE POSTS (sin cambios)
+// VISTA PREVIA DE POSTS (sin cambios, pero la descripción se muestra)
 // ------------------------------------------------------------
 function initPostSelection() {
     const feed = document.getElementById('feed');
@@ -430,6 +426,17 @@ function initPostSelection() {
         container.innerHTML = '';
         container.appendChild(clone);
         
+        // Aseguramos que la descripción se muestre con estilos adecuados en la preview
+        const desc = clone.querySelector('.post-description');
+        if (desc) {
+            desc.style.display = 'block';
+            desc.style.padding = '12px 16px';
+            desc.style.color = 'var(--text-1)';
+            desc.style.fontSize = '16px';
+            desc.style.borderBottom = '1px solid var(--border-vivid)';
+            desc.style.background = 'var(--bg-raised)';
+        }
+        
         const carousel = clone.querySelector('.post-image-carousel');
         if (carousel) {
             carousel.dataset.initialized = '';
@@ -464,12 +471,10 @@ function updateAuthUI(user) {
     const userAvatarImg = document.getElementById('user-avatar-img');
 
     if (user) {
-        // Usuario autenticado
         registerBtn.style.display = 'none';
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
         userAvatar.style.display = 'flex';
-        // Mostrar foto de perfil si existe, si no, mostrar iniciales
         if (user.photoURL) {
             userAvatarImg.src = user.photoURL;
         } else {
@@ -478,7 +483,6 @@ function updateAuthUI(user) {
         }
         userAvatar.title = user.displayName || 'Usuario';
     } else {
-        // No autenticado
         registerBtn.style.display = 'flex';
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
@@ -528,21 +532,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(style);
     }
 
-    // Inicializar elementos estáticos (si los hay)
     initAllCarousels();
     initActions();
 
-    // Escuchar cambios en el estado de autenticación
     onAuthStateChanged(auth, (user) => {
         updateAuthUI(user);
-        // Si el usuario cambia, podríamos recargar el feed para mostrar datos personalizados
-        // Por ahora solo actualizamos la UI
     });
 
-    // Cargar posts desde Firestore
     cargarPostsDesdeLaNube();
-
-    // Inicializar la vista previa
     initPostSelection();
 
     // ------------------------------------------------------------
@@ -617,7 +614,6 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 await signOut(auth);
                 showGlobalNotification('Sesión cerrada correctamente.', '#f87171');
-                // La UI se actualizará automáticamente gracias a onAuthStateChanged
             } catch (error) {
                 console.error('Error al cerrar sesión:', error);
                 showGlobalNotification('Error al cerrar sesión.', '#e74c3c');
