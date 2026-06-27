@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Registro - BIN</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        /* Estilos específicos para registro */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: var(--bg-base);
+            padding: 20px;
+        }
+        .register-container {
+            max-width: 420px;
+            width: 100%;
+            background: var(--bg-surface);
+            border-radius: 24px;
+            padding: 30px 24px 40px;
+            border: 1px solid var(--border-vivid);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+        }
+        .register-container h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            color: var(--text-1);
+            margin-bottom: 8px;
+        }
+        .register-container .sub {
+            text-align: center;
+            color: var(--text-2);
+            font-size: 14px;
+            margin-bottom: 28px;
+        }
+        .register-container label {
+            display: block;
+            color: var(--text-1);
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 16px;
+            margin-bottom: 6px;
+        }
+        .register-container input[type="text"],
+        .register-container input[type="email"],
+        .register-container input[type="password"] {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-1);
+            font-size: 15px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .register-container input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(192,132,252,0.2);
+        }
+        .register-container .photo-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+        .register-container .photo-preview {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--bg-raised);
+            border: 2px solid var(--border-vivid);
+            overflow: hidden;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--text-2);
+        }
+        .register-container .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .register-container .photo-upload-btn {
+            background: var(--bg-raised);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 18px;
+            color: var(--text-1);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .register-container .photo-upload-btn:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+        .register-container .photo-upload-btn input {
+            display: none;
+        }
+        .register-container .btn-register {
+            width: 100%;
+            margin-top: 28px;
+            padding: 16px;
+            background: var(--accent);
+            border: none;
+            border-radius: 14px;
+            color: #0a0a0f;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 0 24px rgba(192,132,252,0.3);
+        }
+        .register-container .btn-register:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 40px rgba(192,132,252,0.5);
+        }
+        .register-container .btn-register:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .register-container .error-msg {
+            color: var(--like-red);
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+        }
+        .register-container .success-msg {
+            color: var(--neon-green);
+            font-size: 14px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .register-container .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-2);
+            font-size: 14px;
+        }
+        .register-container .login-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-container .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="register-container">
+    <h1>BIN</h1>
+    <p class="sub">Crear cuenta</p>
+
+    <form id="register-form" autocomplete="off">
+        <label for="username">Nombre de usuario</label>
+        <input type="text" id="username" placeholder="Ej: ana_creativa" required />
+
+        <label for="email">Correo electrónico</label>
+        <input type="email" id="email" placeholder="tú@email.com" required />
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+
+        <label for="confirm">Confirmar contraseña</label>
+        <input type="password" id="confirm" placeholder="Repite la contraseña" required />
+
+        <label>Foto de perfil (opcional)</label>
+        <div class="photo-area">
+            <div class="photo-preview" id="photo-preview">👤</div>
+            <label class="photo-upload-btn">
+                Elegir imagen
+                <input type="file" id="photo-input" accept="image/*" />
+            </label>
+        </div>
+
+        <button type="submit" class="btn-register" id="register-btn">Registrarse</button>
+        <div id="form-error" class="error-msg"></div>
+        <div id="form-success" class="success-msg"></div>
+    </form>
+
+    <div class="login-link">
+        ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+    </div>
+</div>
+
+<script type="module" src="registro.js"></script>
+</body>
+</html>

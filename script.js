@@ -1,6 +1,7 @@
 // Importar los módulos necesarios desde la CDN de Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -12,9 +13,10 @@ const firebaseConfig = {
   appId: "1:446700825873:web:2550025dfc6610b8a2b8b3"
 };
 
-// Inicializar Firebase y Firestore
+// Inicializar Firebase, Firestore y Auth
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ------------------------------------------------------------
 // FUNCIONES DEL CARRUSEL (sin cambios)
@@ -452,6 +454,40 @@ function initPostSelection() {
 }
 
 // ------------------------------------------------------------
+// MANEJO DE AUTENTICACIÓN Y VISIBILIDAD DE BOTONES
+// ------------------------------------------------------------
+function updateAuthUI(user) {
+    const registerBtn = document.getElementById('register-btn-nav');
+    const loginBtn = document.getElementById('login-btn-nav');
+    const logoutBtn = document.getElementById('logout-btn');
+    const userAvatar = document.getElementById('user-avatar');
+    const userAvatarImg = document.getElementById('user-avatar-img');
+
+    if (user) {
+        // Usuario autenticado
+        registerBtn.style.display = 'none';
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'flex';
+        userAvatar.style.display = 'flex';
+        // Mostrar foto de perfil si existe, si no, mostrar iniciales
+        if (user.photoURL) {
+            userAvatarImg.src = user.photoURL;
+        } else {
+            const name = user.displayName || 'Usuario';
+            userAvatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c3aed&color=fff&size=64`;
+        }
+        userAvatar.title = user.displayName || 'Usuario';
+    } else {
+        // No autenticado
+        registerBtn.style.display = 'flex';
+        loginBtn.style.display = 'flex';
+        logoutBtn.style.display = 'none';
+        userAvatar.style.display = 'none';
+        userAvatarImg.src = '';
+    }
+}
+
+// ------------------------------------------------------------
 // INICIALIZACIÓN AL CARGAR EL DOM
 // ------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function() {
@@ -496,7 +532,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initAllCarousels();
     initActions();
 
-    // Cargar posts desde Firestore (internamente reinicializa carruseles y acciones)
+    // Escuchar cambios en el estado de autenticación
+    onAuthStateChanged(auth, (user) => {
+        updateAuthUI(user);
+        // Si el usuario cambia, podríamos recargar el feed para mostrar datos personalizados
+        // Por ahora solo actualizamos la UI
+    });
+
+    // Cargar posts desde Firestore
     cargarPostsDesdeLaNube();
 
     // Inicializar la vista previa
@@ -563,5 +606,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 setTimeout(() => notif.remove(), 1500);
             });
         }
+    }
+
+    // ------------------------------------------------------------
+    // CERRAR SESIÓN
+    // ------------------------------------------------------------
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+                showGlobalNotification('Sesión cerrada correctamente.', '#f87171');
+                // La UI se actualizará automáticamente gracias a onAuthStateChanged
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                showGlobalNotification('Error al cerrar sesión.', '#e74c3c');
+            }
+        });
     }
 });

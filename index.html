@@ -25,12 +25,28 @@
             <div class="app-title">BIN</div>
         </div>
 
-        <!-- Navegación SUPERIOR -->
+        <!-- Navegación SUPERIOR con botones de autenticación -->
         <div class="top-nav">
             <a href="crear-post.html" class="create-post-btn" title="Crear nuevo post">
                 <span class="plus-icon">+</span>
             </a>
-            <!-- Círculos con fotos de perfil -->
+            <!-- Botón Registrarse (visible solo si no autenticado) -->
+            <a href="registro.html" class="nav-auth-btn" id="register-btn-nav" title="Registrarse">
+                <span class="auth-icon">📝</span>
+            </a>
+            <!-- Botón Iniciar sesión (visible solo si no autenticado) -->
+            <a href="login.html" class="nav-auth-btn" id="login-btn-nav" title="Iniciar sesión">
+                <span class="auth-icon">🔑</span>
+            </a>
+            <!-- Botón Cerrar sesión (visible solo si autenticado) -->
+            <button class="nav-auth-btn" id="logout-btn" title="Cerrar sesión" style="display:none;">
+                <span class="auth-icon">🚪</span>
+            </button>
+            <!-- Círculo con foto de perfil del usuario (visible solo si autenticado) -->
+            <div class="drop-zone" id="user-avatar" style="display:none;">
+                <img id="user-avatar-img" src="" alt="User">
+            </div>
+            <!-- Círculos de perfil de ejemplo -->
             <div class="drop-zone"><img src="imagenes/perfiles/pou.jpg" alt="Pou"></div>
             <div class="drop-zone"><img src="imagenes/perfiles/dwey.jpg" alt="Dwey"></div>
             <div class="drop-zone"><img src="imagenes/perfiles/pepe.jpg" alt="Pepe"></div>
@@ -39,8 +55,8 @@
 
         <!-- Feed -->
         <div class="feed-container" id="feed">
-
-        </div><!-- /feed -->
+            <!-- Los posts se cargan dinámicamente con JavaScript -->
+        </div>
 
         <!-- Cámara (overlay) -->
         <div id="camera-overlay" class="camera-overlay">
@@ -60,9 +76,10 @@
 
     <div id="drag-element"></div>
 
-    <!-- Cambia tu etiqueta tradicional por esta -->
-<script type="module" src="script.js"></script>
+    <!-- Script principal (módulo) -->
+    <script type="module" src="script.js"></script>
 
+    <!-- Overlay de previsualización -->
     <div id="post-preview-overlay" class="preview-overlay">
         <button id="close-preview" class="close-preview-btn">✕</button>
         <div id="preview-container" class="preview-content"></div>
