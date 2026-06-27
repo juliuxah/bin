@@ -229,7 +229,7 @@ body.dragging {
 }
 
 /* ============================================================
-   FEED EN GRID 3×N (CORREGIDO PARA EVITAR SUPERPOSICIÓN)
+   FEED EN GRID 3×N
    ============================================================ */
 .feed-container {
     position: absolute;
@@ -253,7 +253,7 @@ body.dragging {
 }
 
 /* ============================================================
-   TARJETA DE POST (con dimensiones fijas y sin superposición)
+   TARJETA DE POST (más alargada: 3:4)
    ============================================================ */
 .post-card {
     background: var(--bg-surface);
@@ -261,7 +261,7 @@ body.dragging {
     overflow: hidden;
     border: 1px solid var(--border);
     width: 100%;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 3 / 4;               /* ← más alto que ancho (3:4) */
     display: flex;
     flex-direction: column;
     cursor: default;
@@ -278,7 +278,7 @@ body.dragging {
     opacity: 0.2;
 }
 
-/* Ocultar descripción y título en el feed (solo se ven en preview) */
+/* Ocultar descripción y título en el feed (solo visibles en preview) */
 .feed-container .post-card .post-header-black,
 .feed-container .post-card .post-description,
 .feed-container .post-card .post-title {
@@ -308,7 +308,7 @@ body.dragging {
     display: block;
 }
 
-/* Cabecera de usuario (solo para diseño, no se usa realmente) */
+/* Cabecera de usuario (solo para diseño, no usada en producción) */
 .post-header-user {
     display: flex;
     align-items: center;
