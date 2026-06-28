@@ -410,7 +410,8 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
                 color: var(--text-2);
                 font-size: 14px;
             `;
-            sentinel.innerHTML = '<div class="loading-spinner">Cargando más publicaciones…</div>';
+            // CORREGIDO: spinner y texto separados
+            sentinel.innerHTML = '<span class="loading-spinner"></span> Cargando más publicaciones…';
             feed.appendChild(sentinel);
             observeSentinel();
         } else {
@@ -727,7 +728,7 @@ function updateAuthUI(user) {
     const registerBtn = document.getElementById('register-btn-nav');
     const loginBtn = document.getElementById('login-btn-nav');
     const logoutBtn = document.getElementById('logout-btn');
-    const userAvatarContainer = document.getElementById('user-avatar'); // el div contenedor
+    const userAvatarContainer = document.getElementById('user-avatar'); // ahora es un <a>
     const userAvatarImg = document.getElementById('user-avatar-img');
     const createPostBtn = document.querySelector('.create-post-btn');
     const feed = document.getElementById('feed');
@@ -738,19 +739,9 @@ function updateAuthUI(user) {
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
 
-        // Mostrar avatar como enlace a perfil
         if (userAvatarContainer) {
             userAvatarContainer.style.display = 'flex';
-            // Convertir el div en un enlace (o usar onclick)
-            const avatarLink = document.createElement('a');
-            avatarLink.href = 'perfil.html';
-            avatarLink.style.display = 'contents'; // para no romper el layout
-            // Mover el contenido del div al enlace
-            while (userAvatarContainer.firstChild) {
-                avatarLink.appendChild(userAvatarContainer.firstChild);
-            }
-            userAvatarContainer.appendChild(avatarLink);
-            // Si ya tiene imagen, se mantiene
+            userAvatarContainer.href = 'perfil.html'; // enlace a perfil
             if (user.photoURL) {
                 userAvatarImg.src = user.photoURL;
             } else {
@@ -808,8 +799,6 @@ function updateAuthUI(user) {
         logoutBtn.style.display = 'none';
         if (userAvatarContainer) {
             userAvatarContainer.style.display = 'none';
-            // Limpiar el contenido extra (el enlace que pudimos haber agregado)
-            userAvatarContainer.innerHTML = `<img id="user-avatar-img" src="" alt="User">`;
             userAvatarImg.src = '';
         }
         if (createPostBtn) createPostBtn.style.display = 'none';

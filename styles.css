@@ -19,7 +19,7 @@
     --border:       rgba(247, 201, 72, 0.15);
     --border-vivid: rgba(247, 201, 72, 0.5);
     --like-red:     #f87171;
-    --radius-card:  4px 12px 4px 12px;  /* bordes irregulares */
+    --radius-card:  4px 12px 4px 12px;
     --radius-pill:  999px;
     --shadow-glow:  0 0 20px rgba(247, 201, 72, 0.2);
 }
@@ -532,7 +532,7 @@ body.dragging {
 }
 
 /* ============================================================
-   CÁMARA OVERLAY (sin cambios de estilo, solo mantenemos)
+   CÁMARA OVERLAY
    ============================================================ */
 .camera-overlay {
     position: absolute;
