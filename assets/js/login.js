@@ -35,11 +35,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorDiv = document.getElementById('form-error');
     const successDiv = document.getElementById('form-success');
 
-    // Verificar si ya hay usuario autenticado (redirigir al feed)
+    // Verificar si los elementos existen (debug)
+    if (!form || !emailInput || !passwordInput || !loginBtn) {
+        console.error('❌ No se encontraron todos los elementos del formulario.');
+        return;
+    }
+
+    // --- Si el usuario ya está autenticado, redirigir al index ---
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Si ya hay sesión, redirigir al index
-            window.location.href = 'pages/index.html';
+            console.log('ℹ️ Usuario ya autenticado, redirigiendo...');
+            window.location.href = '../index.html'; // CORREGIDO
         }
     });
 
@@ -49,44 +55,65 @@ document.addEventListener('DOMContentLoaded', function() {
         errorDiv.textContent = '';
         successDiv.textContent = '';
         loginBtn.disabled = true;
+        loginBtn.textContent = '⏳ ENTRANDO...';
 
         const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        const password = passwordInput.value.trim();
 
         if (!email || !password) {
-            errorDiv.textContent = 'Todos los campos son obligatorios.';
+            errorDiv.textContent = '⚠️ Todos los campos son obligatorios.';
             loginBtn.disabled = false;
+            loginBtn.textContent = 'ENTRAR';
             return;
         }
 
         try {
-            // Iniciar sesión con Firebase Auth
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             console.log(`✅ Usuario autenticado: ${user.uid}`);
 
             successDiv.textContent = '¡Sesión iniciada correctamente! Redirigiendo...';
             loginBtn.disabled = true;
+            loginBtn.textContent = '✓ ENTRADO';
 
-            // Redirigir al feed después de 1.5s
+            // Redirigir al feed (ruta relativa desde pages/)
             setTimeout(() => {
-                window.location.href = 'pages/index.html';
+                window.location.href = '../index.html'; // CORREGIDO
             }, 1500);
 
         } catch (error) {
             console.error('❌ Error al iniciar sesión:', error);
-            let msg = error.message;
-            if (error.code === 'auth/user-not-found') {
-                msg = 'No hay cuenta con este correo.';
-            } else if (error.code === 'auth/wrong-password') {
-                msg = 'Contraseña incorrecta.';
-            } else if (error.code === 'auth/too-many-requests') {
-                msg = 'Demasiados intentos fallidos. Intenta más tarde.';
-            } else if (error.code === 'auth/invalid-email') {
-                msg = 'El correo no es válido.';
+            let msg = 'Error desconocido.';
+            switch (error.code) {
+                case 'auth/user-not-found':
+                    msg = '❌ No hay cuenta con este correo.';
+                    break;
+                case 'auth/wrong-password':
+                    msg = '❌ Contraseña incorrecta.';
+                    break;
+                case 'auth/too-many-requests':
+                    msg = '⛔ Demasiados intentos fallidos. Intenta más tarde.';
+                    break;
+                case 'auth/invalid-email':
+                    msg = '❌ El correo no es válido.';
+                    break;
+                default:
+                    msg = `❌ ${error.message}`;
             }
             errorDiv.textContent = msg;
             loginBtn.disabled = false;
+            loginBtn.textContent = 'ENTRAR';
         }
+    });
+
+    // --- Permitir login con Enter ---
+    const inputs = [emailInput, passwordInput];
+    inputs.forEach(input => {
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginBtn.click();
+            }
+        });
     });
 });

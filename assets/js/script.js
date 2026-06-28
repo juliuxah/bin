@@ -741,7 +741,7 @@ function updateAuthUI(user) {
 
         if (userAvatarContainer) {
             userAvatarContainer.style.display = 'flex';
-            userAvatarContainer.href = 'perfil.html'; // enlace a perfil
+            userAvatarContainer.href = 'pages/perfil.html'; // enlace a perfil
             if (user.photoURL) {
                 userAvatarImg.src = user.photoURL;
             } else {

@@ -6,13 +6,13 @@
     <title>Iniciar Sesión - BIN</title>
     <link rel="stylesheet" href="../assets/css/styles.css" />
     <style>
-        /* Estilos rápidos para login (puedes moverlos a un CSS específico) */
         body {
             background: #0d0b0e;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
         }
         .login-container {
             background: #161218;
@@ -62,6 +62,11 @@
             transform: scale(1.02);
             box-shadow: 0 0 20px rgba(247,201,72,0.3);
         }
+        .login-container button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .login-container .links {
             text-align: center;
             margin-top: 20px;
@@ -82,6 +87,14 @@
             font-size: 14px;
             text-align: center;
             margin-bottom: 12px;
+            min-height: 20px;
+        }
+        .login-container .success {
+            color: #4ade80;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 12px;
+            min-height: 20px;
         }
         .back-home {
             display: block;
@@ -100,10 +113,14 @@
 <body>
     <div class="login-container">
         <h1>🔑 INICIAR SESIÓN</h1>
-        <div id="error-message" class="error"></div>
-        <input type="email" id="email" placeholder="Correo electrónico" />
-        <input type="password" id="password" placeholder="Contraseña" />
-        <button id="login-btn">ENTRAR</button>
+        <!-- FORMULARIO con ID correcto -->
+        <form id="login-form">
+            <div id="form-error" class="error"></div>
+            <div id="form-success" class="success"></div>
+            <input type="email" id="email" placeholder="Correo electrónico" required />
+            <input type="password" id="password" placeholder="Contraseña" required />
+            <button id="login-btn" type="submit">ENTRAR</button>
+        </form>
         <div class="links">
             ¿No tienes cuenta? <a href="registro.html">Regístrate</a>
         </div>
