@@ -807,13 +807,14 @@ function updateAuthUI(user) {
         if (feed) {
             let authMsg = document.getElementById('auth-message');
             if (authMsg) {
+                // En la parte de usuario NO autenticado
                 authMsg.innerHTML = `
                     <div style="font-size: 32px;">🔐</div>
                     <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
                     <div style="font-size: 13px; color: var(--text-2);">
-                        <a href="login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
+                        <a href="pages/login.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Iniciar sesión</a>
                         &nbsp;o&nbsp;
-                        <a href="registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
+                        <a href="pages/registro.html" style="color: var(--accent); text-decoration: none; font-weight: 600;">Registrarse</a>
                     </div>
                 `;
                 authMsg.style.background = 'var(--bg-surface)';

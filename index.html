@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
     <style>
         html, body {
             touch-action: manipulation;
@@ -32,25 +32,24 @@
 
         <!-- Navegación SUPERIOR con botones de autenticación -->
         <div class="top-nav">
-            <a href="crear-post.html" class="create-post-btn" title="Crear nuevo post">
+            <a href="pages/crear-post.html" class="create-post-btn" title="Crear nuevo post">
                 <span class="plus-icon">+</span>
             </a>
-            <a href="registro.html" class="nav-auth-btn" id="register-btn-nav" title="Registrarse">
+            <a href="pages/registro.html" class="nav-auth-btn" id="register-btn-nav" title="Registrarse">
                 <span class="auth-icon">📝</span>
             </a>
-            <a href="login.html" class="nav-auth-btn" id="login-btn-nav" title="Iniciar sesión">
+            <a href="pages/login.html" class="nav-auth-btn" id="login-btn-nav" title="Iniciar sesión">
                 <span class="auth-icon">🔑</span>
             </a>
             <button class="nav-auth-btn" id="logout-btn" title="Cerrar sesión" style="display:none;">
                 <span class="auth-icon">🚪</span>
             </button>
-            <!-- Reemplazar el div user-avatar por un enlace -->
-            <a href="perfil.html" class="drop-zone" id="user-avatar" style="display:none;">
+            <a href="pages/perfil.html" class="drop-zone" id="user-avatar" style="display:none;">
                 <img id="user-avatar-img" src="" alt="User">
             </a>
-            <div class="drop-zone"><img src="imagenes/perfiles/pou.jpg" alt="Pou"></div>
-            <div class="drop-zone"><img src="imagenes/perfiles/dwey.jpg" alt="Dwey"></div>
-            <div class="drop-zone"><img src="imagenes/perfiles/pepe.jpg" alt="Pepe"></div>
+            <div class="drop-zone"><img src="assets/images/perfiles/pou.jpg" alt="Pou"></div>
+            <div class="drop-zone"><img src="assets/images/perfiles/dwey.jpg" alt="Dwey"></div>
+            <div class="drop-zone"><img src="assets/images/perfiles/pepe.jpg" alt="Pepe"></div>
             <div id="camera-btn" class="camera-icon"></div>
         </div>
 
@@ -80,7 +79,7 @@
     <div id="drag-element"></div>
 
     <!-- Script principal (módulo) -->
-    <script type="module" src="script.js"></script>
+    <script type="module" src="assets/js/script.js"></script>
 
     <!-- Overlay de previsualización fullscreen -->
     <div id="post-preview-overlay" class="preview-overlay">

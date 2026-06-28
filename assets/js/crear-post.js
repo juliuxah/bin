@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Verificar autenticación antes de publicar (doble seguridad)
         if (!isUserAuthenticated) {
             alert('Debes iniciar sesión para publicar.');
-            window.location.href = 'login.html';
+            window.location.href = 'pages/login.html';
             return;
         }
 
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 imageInput.value = '';
 
                 setTimeout(() => {
-                    window.location.href = 'index.html';
+                    window.location.href = 'pages/index.html';
                 }, 1500);
 
             } catch (error) {
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             document.body.appendChild(warning);
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = 'pages/login.html';
             }, 1500);
         }
     });

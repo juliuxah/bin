@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrarse - BIN</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+    <style>
+        /* mismos estilos que login */
+        body {
+            background: #0d0b0e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .register-container {
+            background: #161218;
+            padding: 40px 30px;
+            border-radius: 8px 20px 8px 20px;
+            border: 2px solid var(--border-vivid);
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(247,201,72,0.05);
+        }
+        .register-container h1 {
+            font-family: 'Anton', sans-serif;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 4px;
+        }
+        .register-container input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background: var(--bg-base);
+            border: 2px solid var(--border);
+            border-radius: 4px 12px 4px 12px;
+            color: var(--text-1);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .register-container input:focus {
+            border-color: var(--accent);
+        }
+        .register-container button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            border: none;
+            border-radius: 4px 12px 4px 12px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 20px;
+            color: #0d0b0e;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 2px;
+        }
+        .register-container button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(247,201,72,0.3);
+        }
+        .register-container .links {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-2);
+            font-size: 14px;
+        }
+        .register-container .links a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 8px;
+        }
+        .register-container .links a:hover {
+            text-decoration: underline;
+        }
+        .register-container .error {
+            color: var(--like-red);
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .back-home {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-2);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .back-home:hover {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>📝 REGISTRARSE</h1>
+        <div id="error-message" class="error"></div>
+        <input type="text" id="nombre" placeholder="Nombre completo" />
+        <input type="email" id="email" placeholder="Correo electrónico" />
+        <input type="password" id="password" placeholder="Contraseña" />
+        <button id="register-btn">CREAR CUENTA</button>
+        <div class="links">
+            ¿Ya tienes cuenta? <a href="login.html">Inicia sesión</a>
+        </div>
+        <a href="../index.html" class="back-home">← Volver al inicio</a>
+    </div>
+    <script type="module" src="../assets/js/registro.js"></script>
+</body>
+</html>

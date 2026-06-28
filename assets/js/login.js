@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             // Si ya hay sesión, redirigir al index
-            window.location.href = 'index.html';
+            window.location.href = 'pages/index.html';
         }
     });
 
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Redirigir al feed después de 1.5s
             setTimeout(() => {
-                window.location.href = 'index.html';
+                window.location.href = 'pages/index.html';
             }, 1500);
 
         } catch (error) {
