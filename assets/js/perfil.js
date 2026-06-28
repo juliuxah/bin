@@ -5,7 +5,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCZwssYsjLjBXiiE5_lBNPYICU3MLgJR08",
   authDomain: "bin1-462ea.firebaseapp.com",
@@ -32,9 +31,10 @@ async function cargarPerfil(uid) {
     try {
         // Obtener datos del usuario desde Firestore (colección "usuarios")
         const userDoc = await getDoc(doc(db, 'usuarios', uid));
+        const user = auth.currentUser;
+
         if (!userDoc.exists()) {
-            // Si no existe en Firestore, usar datos de Auth
-            const user = auth.currentUser;
+            // Usar datos de Auth
             mostrarPerfil({
                 nombre: user.displayName || 'Usuario',
                 email: user.email || '',
@@ -42,22 +42,24 @@ async function cargarPerfil(uid) {
                 foto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'Usuario')}&background=f7c948&color=0d0b0e&size=128`,
                 portada: '',
                 posts: [],
-                eventos: []
+                eventos: [
+                    { fecha: '20 Jul', nombre: 'Street Art Jam' },
+                    { fecha: '5 Ago', nombre: 'Graffiti Battle' }
+                ]
             });
             return;
         }
 
         const data = userDoc.data();
         // Obtener posts del usuario (si guardas el uid en cada post)
-        const postsQuery = query(collection(db, 'posts'), where('uid', '==', uid));
-        const postsSnapshot = await getDocs(postsQuery);
-        const posts = postsSnapshot.docs.map(doc => doc.data());
-
-        // Eventos (puedes tener una colección "eventos" o simular)
-        const eventos = data.eventos || [
-            { fecha: '20 Jul', nombre: 'Street Art Jam' },
-            { fecha: '5 Ago', nombre: 'Graffiti Battle' }
-        ];
+        let posts = [];
+        try {
+            const postsQuery = query(collection(db, 'posts'), where('uid', '==', uid));
+            const postsSnapshot = await getDocs(postsQuery);
+            posts = postsSnapshot.docs.map(doc => doc.data());
+        } catch (e) {
+            console.warn('No se pudieron cargar posts:', e);
+        }
 
         mostrarPerfil({
             nombre: data.nombre || 'Usuario',
@@ -66,7 +68,10 @@ async function cargarPerfil(uid) {
             foto: data.foto || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.nombre || 'Usuario')}&background=f7c948&color=0d0b0e&size=128`,
             portada: data.portada || '',
             posts: posts,
-            eventos: eventos
+            eventos: data.eventos || [
+                { fecha: '20 Jul', nombre: 'Street Art Jam' },
+                { fecha: '5 Ago', nombre: 'Graffiti Battle' }
+            ]
         });
 
     } catch (error) {
@@ -90,13 +95,14 @@ function mostrarPerfil(perfil) {
         ? `<img src="${perfil.portada}" alt="Portada">`
         : '';
 
+    // Generar miniaturas de posts (si hay imágenes)
     const postsHTML = perfil.posts && perfil.posts.length > 0
         ? perfil.posts.map(post => `
             <div class="post-thumb">
                 <img src="${post.image || 'assets/images/default-post.jpg'}" alt="Post">
             </div>
         `).join('')
-        : '<p style="grid-column:1/-1; text-align:center; color:var(--text-2);">Sin publicaciones</p>';
+        : '<div class="empty-message">Sin publicaciones aún</div>';
 
     const eventosHTML = perfil.eventos && perfil.eventos.length > 0
         ? perfil.eventos.map(ev => `
@@ -105,7 +111,7 @@ function mostrarPerfil(perfil) {
                 <span class="event-name">${ev.nombre}</span>
             </div>
         `).join('')
-        : '<p style="color:var(--text-2);">Sin eventos próximos</p>';
+        : '<p class="empty-message" style="grid-column:1/-1;">Sin eventos próximos</p>';
 
     container.innerHTML = `
         <div class="cover">${portadaHTML}</div>
@@ -116,6 +122,7 @@ function mostrarPerfil(perfil) {
         </div>
         <div class="user-info">
             <div class="name">${perfil.nombre}</div>
+            <div class="email">${perfil.email}</div>
             <div class="bio">${perfil.bio}</div>
         </div>
         <div class="stats">
@@ -133,25 +140,26 @@ function mostrarPerfil(perfil) {
             </div>
         </div>
 
-        <div class="section-title">📸 Publicaciones</div>
+        <div class="section-title">
+            <span class="icon">📸</span> Publicaciones
+        </div>
         <div class="grid-posts">${postsHTML}</div>
 
-        <div class="section-title" style="margin-top:20px;">📅 Eventos</div>
+        <div class="section-title" style="margin-top:12px;">
+            <span class="icon">📅</span> Eventos
+        </div>
         <div class="events-list">${eventosHTML}</div>
 
-        <button id="edit-profile-btn" class="btn-edit">✏️ EDITAR PERFIL</button>
+        <button id="edit-profile-btn">✏️ EDITAR PERFIL</button>
     `;
 
-    // Ahora que el botón existe, podemos asignarle el evento
+    // Asignar evento al botón editar
     const editBtn = document.getElementById('edit-profile-btn');
     if (editBtn) {
         editBtn.addEventListener('click', function() {
             alert('Función de editar perfil en desarrollo.');
             // Aquí puedes abrir un modal o redirigir a una página de edición.
         });
-        console.log('✅ Botón editar perfil registrado.');
-    } else {
-        console.warn('⚠️ Botón editar perfil no encontrado después de renderizar.');
     }
 }
 
@@ -164,7 +172,6 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log(`👤 Usuario autenticado: ${user.uid}`);
             cargarPerfil(user.uid);
         } else {
-            // No autenticado: redirigir al login
             console.warn('⛔ Usuario no autenticado. Redirigiendo a login...');
             window.location.href = '../pages/login.html';
         }
