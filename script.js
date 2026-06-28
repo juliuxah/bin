@@ -348,7 +348,6 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
     isLoading = true;
     const feed = document.getElementById('feed');
 
-    // Si es la primera carga, mostrar loading y limpiar feed
     if (!loadMore) {
         feed.innerHTML = `<div class="loading-message">Cargando publicaciones…</div>`;
         lastVisible = null;
@@ -356,7 +355,6 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
     }
 
     try {
-        // Construir consulta
         let q = query(collection(db, "posts"), orderBy("fecha", "desc"), limit(PAGE_SIZE));
         if (loadMore && lastVisible) {
             q = query(collection(db, "posts"), orderBy("fecha", "desc"), startAfter(lastVisible), limit(PAGE_SIZE));
@@ -370,7 +368,6 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
             if (!loadMore) {
                 feed.innerHTML = `<div class="empty-message">No hay publicaciones aún. ¡Crea la primera!</div>`;
             } else {
-                // Mostrar "No hay más publicaciones" en el centinela
                 const sentinel = document.getElementById('sentinel');
                 if (sentinel) {
                     sentinel.innerHTML = '<div class="no-more-message">— No hay más publicaciones —</div>';
@@ -380,36 +377,29 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
             return;
         }
 
-        // Guardar el último documento para la próxima página
         lastVisible = docs[docs.length - 1];
 
-        // Si es primera carga, limpiar feed (ya lo hicimos con el loading)
         if (!loadMore) {
             feed.innerHTML = '';
         } else {
-            // Quitar el centinela anterior (si existe) para evitar duplicados
             const oldSentinel = document.getElementById('sentinel');
             if (oldSentinel) oldSentinel.remove();
         }
 
-        // Crear y añadir posts
         docs.forEach((doc) => {
             const postData = doc.data();
             const newPost = createPostElement(postData, doc.id);
             feed.appendChild(newPost);
         });
 
-        // Inicializar acciones en los nuevos posts (NO carrusel)
         initActions();
 
-        // Aplicar lazy loading a las imágenes nuevas
         feed.querySelectorAll('.carousel-slide img').forEach(img => {
             if (!img.hasAttribute('loading')) {
                 img.setAttribute('loading', 'lazy');
             }
         });
 
-        // Crear centinela para el scroll infinito (si hay más posts)
         if (docs.length === PAGE_SIZE) {
             const sentinel = document.createElement('div');
             sentinel.id = 'sentinel';
@@ -422,12 +412,9 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
             `;
             sentinel.innerHTML = '<div class="loading-spinner">Cargando más publicaciones…</div>';
             feed.appendChild(sentinel);
-            
-            // Si el centinela ya está visible, cargar más inmediatamente
             observeSentinel();
         } else {
             hasMore = false;
-            // Mostrar mensaje de fin en un centinela
             const sentinel = document.createElement('div');
             sentinel.id = 'sentinel';
             sentinel.style.cssText = `
@@ -441,7 +428,6 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
             feed.appendChild(sentinel);
         }
 
-        // Actualizar UI de autenticación (para mostrar mensaje de bienvenida/invitación)
         updateAuthUI(auth.currentUser);
 
         console.log(`✅ Cargados ${docs.length} posts (total: ${feed.querySelectorAll('.post-card').length})`);
@@ -463,7 +449,6 @@ async function cargarPostsDesdeLaNube(loadMore = false) {
 let observer = null;
 
 function observeSentinel() {
-    // Desconectar observador anterior si existe
     if (observer) {
         observer.disconnect();
         observer = null;
@@ -471,8 +456,6 @@ function observeSentinel() {
 
     const sentinel = document.getElementById('sentinel');
     if (!sentinel) return;
-
-    // Si el centinela es el mensaje de "no hay más", no observar
     if (sentinel.querySelector('.no-more-message')) return;
 
     observer = new IntersectionObserver((entries) => {
@@ -484,7 +467,7 @@ function observeSentinel() {
         });
     }, {
         root: document.getElementById('feed'),
-        rootMargin: '0px 0px 100px 0px', // Activa un poco antes de llegar al final
+        rootMargin: '0px 0px 100px 0px',
         threshold: 0.1
     });
 
@@ -499,20 +482,17 @@ function initPostSelection() {
     const overlay = document.getElementById('post-preview-overlay');
     const closeBtn = document.getElementById('close-preview');
 
-    // Índice del post abierto y lista de todos los post-cards del feed
     let currentIndex = 0;
     let allCards = [];
     let previewTrack = null;
 
-    // Estado del swipe entre posts
     let swipeStartX = 0;
     let swipeStartY = 0;
     let swipeActive = false;
-    let swipeDir = null; // 'h' | 'v' | null
+    let swipeDir = null;
     let dragDelta = 0;
     const SWIPE_THRESHOLD = 50;
 
-    // ---------- Construir un slide de preview para un post-card ----------
     function buildSlide(postCard) {
         const slide = document.createElement('div');
         slide.className = 'preview-slide';
@@ -521,7 +501,6 @@ function initPostSelection() {
         const desc = postCard.querySelector('.post-description');
         const carouselSrc = postCard.querySelector('.post-image-carousel');
 
-        // Zona de imagen (ocupa todo el espacio flexible)
         const imgWrap = document.createElement('div');
         imgWrap.className = 'preview-img-wrap';
 
@@ -529,7 +508,6 @@ function initPostSelection() {
             const carouselClone = carouselSrc.cloneNode(true);
             carouselClone.dataset.initialized = '';
             imgWrap.appendChild(carouselClone);
-            // init carrusel de imágenes dentro del slide en el siguiente tick
             requestAnimationFrame(() => initCarousel(carouselClone));
         } else {
             const emoji = document.createElement('div');
@@ -539,7 +517,6 @@ function initPostSelection() {
         }
         slide.appendChild(imgWrap);
 
-        // Panel inferior
         const bottom = document.createElement('div');
         bottom.className = 'preview-bottom';
 
@@ -556,7 +533,6 @@ function initPostSelection() {
             bottom.appendChild(d);
         }
 
-        // Acciones (like, comment, share) copiadas del original
         const actionsRow = document.createElement('div');
         actionsRow.className = 'preview-actions-row';
         const origActions = postCard.querySelectorAll('.action-btn');
@@ -567,20 +543,15 @@ function initPostSelection() {
         bottom.appendChild(actionsRow);
         slide.appendChild(bottom);
 
-        // Inicializar acciones en este slide
         initActions(slide);
-
         return slide;
     }
 
-    // ---------- Abrir overlay en un índice dado ----------
     function openPreview(index) {
-        // Recoger todos los post-cards visibles en el feed en el momento de abrir
         allCards = Array.from(feed.querySelectorAll('.post-card'));
         if (allCards.length === 0) return;
         currentIndex = Math.max(0, Math.min(index, allCards.length - 1));
 
-        // Construir track con un slide por cada post
         const container = document.getElementById('preview-container');
         container.innerHTML = '';
 
@@ -596,20 +567,15 @@ function initPostSelection() {
         trackWrapper.appendChild(previewTrack);
         container.appendChild(trackWrapper);
 
-        // Actualizar contador
         updateCounter();
-        // Posicionar sin animación
         setTrackPosition(currentIndex, false);
 
-        // Mostrar overlay
         overlay.style.display = 'flex';
         overlay.classList.add('active');
 
-        // Registrar swipe-handlers en el overlay
         attachSwipeHandlers(trackWrapper);
     }
 
-    // ---------- Mover el track ----------
     function setTrackPosition(index, animate = true) {
         if (!previewTrack) return;
         previewTrack.style.transition = animate
@@ -639,10 +605,7 @@ function initPostSelection() {
         }
     }
 
-    // ---------- Swipe entre posts (horizontal) ----------
     function attachSwipeHandlers(el) {
-        // Limpiar listeners anteriores clonando el elemento no es ideal aquí;
-        // usamos una bandera en el elemento.
         if (el._swipeAttached) return;
         el._swipeAttached = true;
 
@@ -653,7 +616,6 @@ function initPostSelection() {
     }
 
     function onSwipeStart(e) {
-        // Ignorar si el toque viene de un botón de acción
         if (e.target.closest('.action-btn')) return;
         swipeActive = true;
         swipeDir = null;
@@ -668,19 +630,16 @@ function initPostSelection() {
         const dx = e.clientX - swipeStartX;
         const dy = e.clientY - swipeStartY;
 
-        // Determinar dirección dominante una sola vez
         if (!swipeDir && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
             swipeDir = Math.abs(dx) >= Math.abs(dy) ? 'h' : 'v';
         }
         if (swipeDir !== 'h') return;
 
-        // Evitar scroll vertical mientras se navega horizontalmente
         e.preventDefault();
 
         dragDelta = dx;
-        const base = -currentIndex * 100; // en %
+        const base = -currentIndex * 100;
         const dragPct = (dx / window.innerWidth) * 100;
-        // Resistencia en los extremos
         let pct = base + dragPct;
         if (currentIndex === 0 && dx > 0) pct = base + dragPct * 0.25;
         if (currentIndex === allCards.length - 1 && dx < 0) pct = base + dragPct * 0.25;
@@ -694,13 +653,12 @@ function initPostSelection() {
         if (swipeDir === 'h') {
             if (dragDelta < -SWIPE_THRESHOLD) goTo(currentIndex + 1);
             else if (dragDelta > SWIPE_THRESHOLD) goTo(currentIndex - 1);
-            else goTo(currentIndex); // volver al actual
+            else goTo(currentIndex);
         }
         swipeDir = null;
         dragDelta = 0;
     }
 
-    // ---------- Cerrar overlay ----------
     function closePreview() {
         overlay.style.display = 'none';
         overlay.classList.remove('active');
@@ -711,19 +669,16 @@ function initPostSelection() {
 
     closeBtn.addEventListener('click', closePreview);
 
-    // Cerrar al tocar el fondo (no el contenido)
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closePreview();
     });
 
-    // Cerrar con tecla Escape
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.style.display === 'flex') closePreview();
         if (e.key === 'ArrowRight' && overlay.style.display === 'flex') goTo(currentIndex + 1);
         if (e.key === 'ArrowLeft'  && overlay.style.display === 'flex') goTo(currentIndex - 1);
     });
 
-    // ---------- Abrir al hacer clic/tap en una imagen del feed ----------
     feed.addEventListener('click', function(e) {
         const carousel = e.target.closest('.post-image-carousel');
         if (!carousel) return;
@@ -772,7 +727,7 @@ function updateAuthUI(user) {
     const registerBtn = document.getElementById('register-btn-nav');
     const loginBtn = document.getElementById('login-btn-nav');
     const logoutBtn = document.getElementById('logout-btn');
-    const userAvatar = document.getElementById('user-avatar');
+    const userAvatarContainer = document.getElementById('user-avatar'); // el div contenedor
     const userAvatarImg = document.getElementById('user-avatar-img');
     const createPostBtn = document.querySelector('.create-post-btn');
     const feed = document.getElementById('feed');
@@ -782,22 +737,36 @@ function updateAuthUI(user) {
         registerBtn.style.display = 'none';
         loginBtn.style.display = 'none';
         logoutBtn.style.display = 'flex';
-        userAvatar.style.display = 'flex';
-        if (user.photoURL) {
-            userAvatarImg.src = user.photoURL;
-        } else {
-            const name = user.displayName || 'Usuario';
-            userAvatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c3aed&color=fff&size=64`;
+
+        // Mostrar avatar como enlace a perfil
+        if (userAvatarContainer) {
+            userAvatarContainer.style.display = 'flex';
+            // Convertir el div en un enlace (o usar onclick)
+            const avatarLink = document.createElement('a');
+            avatarLink.href = 'perfil.html';
+            avatarLink.style.display = 'contents'; // para no romper el layout
+            // Mover el contenido del div al enlace
+            while (userAvatarContainer.firstChild) {
+                avatarLink.appendChild(userAvatarContainer.firstChild);
+            }
+            userAvatarContainer.appendChild(avatarLink);
+            // Si ya tiene imagen, se mantiene
+            if (user.photoURL) {
+                userAvatarImg.src = user.photoURL;
+            } else {
+                const name = user.displayName || 'Usuario';
+                userAvatarImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=7c3aed&color=fff&size=64`;
+            }
+            userAvatarContainer.title = user.displayName || 'Usuario';
         }
-        userAvatar.title = user.displayName || 'Usuario';
+
         if (createPostBtn) createPostBtn.style.display = 'flex';
 
-        // Mostrar mensaje de bienvenida en el feed (reemplazar o crear)
+        // Mostrar mensaje de bienvenida en el feed
         if (feed) {
             let authMsg = document.getElementById('auth-message');
             const displayName = user.displayName || 'Usuario';
             if (authMsg) {
-                // Actualizar contenido existente
                 authMsg.innerHTML = `
                     <div style="font-size: 28px;">👋</div>
                     <div><strong>Bienvenido a BIN, ${displayName}!</strong></div>
@@ -807,7 +776,6 @@ function updateAuthUI(user) {
                 authMsg.style.border = '1px solid var(--border-vivid)';
                 authMsg.style.color = 'var(--text-1)';
             } else {
-                // Crear nuevo mensaje de bienvenida
                 const msg = document.createElement('div');
                 msg.id = 'auth-message';
                 msg.style.cssText = `
@@ -834,19 +802,22 @@ function updateAuthUI(user) {
             }
         }
     } else {
-        // No autenticado: ocultar botones y mostrar invitación
+        // No autenticado
         registerBtn.style.display = 'flex';
         loginBtn.style.display = 'flex';
         logoutBtn.style.display = 'none';
-        userAvatar.style.display = 'none';
-        userAvatarImg.src = '';
+        if (userAvatarContainer) {
+            userAvatarContainer.style.display = 'none';
+            // Limpiar el contenido extra (el enlace que pudimos haber agregado)
+            userAvatarContainer.innerHTML = `<img id="user-avatar-img" src="" alt="User">`;
+            userAvatarImg.src = '';
+        }
         if (createPostBtn) createPostBtn.style.display = 'none';
 
         // Mostrar mensaje de invitación en el feed
         if (feed) {
             let authMsg = document.getElementById('auth-message');
             if (authMsg) {
-                // Si existe, actualizar a invitación
                 authMsg.innerHTML = `
                     <div style="font-size: 32px;">🔐</div>
                     <div><strong>Inicia sesión</strong> para publicar y comentar.</div>
@@ -860,7 +831,6 @@ function updateAuthUI(user) {
                 authMsg.style.border = '1px solid var(--border-vivid)';
                 authMsg.style.color = 'var(--text-2)';
             } else {
-                // Crear nuevo mensaje de invitación
                 const msg = document.createElement('div');
                 msg.id = 'auth-message';
                 msg.style.cssText = `
@@ -943,7 +913,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initPostSelection();
 
     // ------------------------------------------------------------
-    // CÁMARA (sin cambios)
+    // CÁMARA
     // ------------------------------------------------------------
     const cameraBtn = document.getElementById('camera-btn');
     const cameraOverlay = document.getElementById('camera-overlay');

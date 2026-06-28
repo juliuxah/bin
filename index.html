@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>BIN - Social</title>
+    <title>BIN · Street Social</title>
+    <!-- Fuentes urbanas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Anton&family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <style>
         html, body {
@@ -20,9 +24,10 @@
 
     <div class="mobile-frame">
 
-        <!-- Barra superior -->
+        <!-- Barra superior con firma -->
         <div class="top-gradient">
             <div class="app-title">BIN</div>
+            <div class="app-tagline">#STREET</div>
         </div>
 
         <!-- Navegación SUPERIOR con botones de autenticación -->
@@ -30,23 +35,19 @@
             <a href="crear-post.html" class="create-post-btn" title="Crear nuevo post">
                 <span class="plus-icon">+</span>
             </a>
-            <!-- Botón Registrarse (visible solo si no autenticado) -->
             <a href="registro.html" class="nav-auth-btn" id="register-btn-nav" title="Registrarse">
                 <span class="auth-icon">📝</span>
             </a>
-            <!-- Botón Iniciar sesión (visible solo si no autenticado) -->
             <a href="login.html" class="nav-auth-btn" id="login-btn-nav" title="Iniciar sesión">
                 <span class="auth-icon">🔑</span>
             </a>
-            <!-- Botón Cerrar sesión (visible solo si autenticado) -->
             <button class="nav-auth-btn" id="logout-btn" title="Cerrar sesión" style="display:none;">
                 <span class="auth-icon">🚪</span>
             </button>
-            <!-- Círculo con foto de perfil del usuario (visible solo si autenticado) -->
-            <div class="drop-zone" id="user-avatar" style="display:none;">
+            <!-- Reemplazar el div user-avatar por un enlace -->
+            <a href="perfil.html" class="drop-zone" id="user-avatar" style="display:none;">
                 <img id="user-avatar-img" src="" alt="User">
-            </div>
-            <!-- Círculos de perfil de ejemplo -->
+            </a>
             <div class="drop-zone"><img src="imagenes/perfiles/pou.jpg" alt="Pou"></div>
             <div class="drop-zone"><img src="imagenes/perfiles/dwey.jpg" alt="Dwey"></div>
             <div class="drop-zone"><img src="imagenes/perfiles/pepe.jpg" alt="Pepe"></div>
@@ -69,8 +70,10 @@
             <div class="camera-shutter"></div>
         </div>
 
-        <!-- Barra inferior -->
-        <div class="bottom-nav"></div>
+        <!-- Barra inferior con firma -->
+        <div class="bottom-nav">
+            <span class="bottom-tag">✪ BIN · STREET CULTURE ✪</span>
+        </div>
 
     </div>
 
@@ -82,9 +85,7 @@
     <!-- Overlay de previsualización fullscreen -->
     <div id="post-preview-overlay" class="preview-overlay">
         <button id="close-preview" class="close-preview-btn">✕</button>
-        <!-- El contador y los slides se inyectan por JS -->
         <div id="preview-container" style="width:100%;height:100%;position:relative;"></div>
-        <!-- Hints de swipe -->
         <div class="preview-swipe-hint left">‹</div>
         <div class="preview-swipe-hint right">›</div>
     </div>
